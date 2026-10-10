@@ -1,0 +1,15 @@
+[project]
+name = "reqcore"
+version = "0.1.0"
+description = "Shared core for requirement analysis: normalization, taxonomy, model clients, cache and budget guard."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "anthropic>=1.13,<2",
+    "pydantic>=2.9",
+    "pyyaml>=6.0",
+    "typesafe-sdk>=0.7.4,<0.8",
+]
+
+[build-system]
+requires = ["uv_build>=0.9,<0.20"]
+build-backend = "uv_build"

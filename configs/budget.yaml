@@ -1,0 +1,9 @@
+# Hard spending limits for model API calls (USD). The total matches the credits loaded for
+# the project; the Anthropic Console spend limit is the server-side backstop.
+total_usd: 10.0
+buckets:
+  jev: 2.0
+  haiku: 2.0
+  opus: 3.0
+# The remaining 3.0 is an unallocated reserve; raising a bucket into it is a deliberate,
+# reviewed change to this file.

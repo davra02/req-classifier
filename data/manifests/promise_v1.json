@@ -1,0 +1,68 @@
+{
+  "dataset_version": "promise_v1",
+  "source": "promise_nfr",
+  "n_raw": 625,
+  "n_clean": 622,
+  "content_hash": "01c163fc28a20857b38a0e62fddeee4536b7bf69e02973bc0ba3cf85123e6973",
+  "removed": [
+    {
+      "removed": "promise-0107",
+      "kept": "promise-0106",
+      "reason": "exact_duplicate",
+      "similarity": 1.0,
+      "removed_label": "F",
+      "kept_label": "F"
+    },
+    {
+      "removed": "promise-0459",
+      "kept": "promise-0425",
+      "reason": "exact_duplicate",
+      "similarity": 1.0,
+      "removed_label": "F",
+      "kept_label": "SE"
+    },
+    {
+      "removed": "promise-0504",
+      "kept": "promise-0499",
+      "reason": "exact_duplicate",
+      "similarity": 1.0,
+      "removed_label": "PE",
+      "kept_label": "PE"
+    }
+  ],
+  "cross_project_near_duplicates": [
+    [
+      "promise-0035",
+      "promise-0074",
+      0.906
+    ],
+    [
+      "promise-0042",
+      "promise-0401",
+      0.918
+    ]
+  ],
+  "leaf_counts": {
+    "functional": 253,
+    "operational_constraint": 76,
+    "other": 48,
+    "performance": 74,
+    "security": 66,
+    "usability": 105
+  },
+  "promise_counts": {
+    "A": 21,
+    "F": 253,
+    "FT": 10,
+    "L": 13,
+    "LF": 38,
+    "MN": 17,
+    "O": 62,
+    "PE": 53,
+    "PO": 1,
+    "SC": 21,
+    "SE": 66,
+    "US": 67
+  },
+  "projects": 15
+}

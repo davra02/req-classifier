@@ -1,0 +1,33 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Data and caches (manifests and split IDs are tracked; raw data and API caches are not)
+data/raw/
+data/processed/
+cache/
+*.sqlite
+*.sqlite3
+
+# Models and artifacts
+*.onnx
+*.safetensors
+*.bin
+runs/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+
+# Node (demo)
+node_modules/
+.next/

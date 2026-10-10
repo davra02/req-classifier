@@ -1,0 +1,29 @@
+[
+  {
+    "name": "promise_nfr",
+    "url": "https://zenodo.org/records/268542/files/nfr.tar?download=1",
+    "sha256": "28f9328ce72f1c54f09b8dd45573eb811b7a78959b5bf290561cbad1d5adb0b5",
+    "bytes": 224256,
+    "license": "CC-BY-4.0",
+    "citation": "Cleland-Huang, J., Mazrouee, S., Liguo, H., Port, D. (2007). nfr [Data set]. Zenodo. https://doi.org/10.5281/zenodo.268542",
+    "verified_at": "2026-10-10"
+  },
+  {
+    "name": "nice",
+    "url": "https://zenodo.org/records/14590935/files/PROMISE-relabeled-NICE.csv?download=1",
+    "sha256": "87acb2172bc6273b8e04c55b4de8bf090cb0a9980b9d23010b20af88245f2642",
+    "bytes": 95725,
+    "license": "CC-BY-4.0",
+    "citation": "Rejithkumar, G., Anish, P. R. (2025). NICE: Non-Functional Requirements Identification, Classification, and Explanation Using Small Language Models [Data set]. Zenodo. https://doi.org/10.5281/zenodo.14590935",
+    "verified_at": "2026-10-10"
+  },
+  {
+    "name": "dalpiaz_re19",
+    "url": "https://zenodo.org/records/3309669/files/explainable-re/RE-2019-Materials-v0.zip?download=1",
+    "sha256": "823521077757a14724b261f4869f8859ac623c87fd98f2e61fb14ab286431f1a",
+    "bytes": 4082492,
+    "license": "GPL-3.0",
+    "citation": "Dalpiaz, F., Dell'Anna, D., Aydemir, F. B., Cevikol, S. (2019). Requirements Classification with Interpretable Machine Learning and Dependency Parsing. RE'19. https://doi.org/10.5281/zenodo.3309669",
+    "verified_at": "2026-10-10"
+  }
+]

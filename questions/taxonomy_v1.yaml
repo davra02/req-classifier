@@ -1,0 +1,63 @@
+# Single source of truth for requirement types. Jev questions and the LLM prompt are both
+# rendered from this file, so both systems compete with the same definitions.
+version: taxonomy_v1
+
+# Two-level hierarchy: functional vs non-functional, then the NFR subclass.
+level1:
+  functional: [functional]
+  non_functional: [performance, security, usability, operational_constraint, other]
+
+# PROMISE NFR original label -> leaf. PO has a single example and is folded into
+# operational_constraint (platform constraint).
+promise_mapping:
+  F: functional
+  PE: performance
+  SC: performance
+  SE: security
+  US: usability
+  LF: usability
+  O: operational_constraint
+  L: operational_constraint
+  PO: operational_constraint
+  A: other
+  FT: other
+  MN: other
+
+classes:
+  functional:
+    what: >-
+      A function or behavior the system must perform: inputs, outputs, data it stores or
+      shows, calculations, and actions it lets users do.
+    not_for: >-
+      How fast, how securely, how easily, or under which conditions the system works.
+  performance:
+    what: >-
+      Speed, response time, throughput, capacity, number of simultaneous users or
+      transactions, and resource use.
+    not_for: >-
+      Whether the system is available or keeps working after failures (that is `other`).
+  security:
+    what: >-
+      Protection against unauthorized access or misuse: authentication, authorization,
+      access rights, encryption, privacy, and audit of access.
+    not_for: >-
+      Compliance with laws or standards that are not about protection (that is
+      `operational_constraint`).
+  usability:
+    what: >-
+      Ease of use, learnability, accessibility, user satisfaction, and the look and feel of
+      the interface: colors, fonts, layout, and style.
+    not_for: >-
+      Which data or functions a screen offers (that is `functional`).
+  operational_constraint:
+    what: >-
+      Conditions the system must run in or comply with: platform, operating system, browser,
+      hardware, external systems it must interface with, deployment environment, laws,
+      regulations, and standards.
+    not_for: >-
+      Speed or capacity (that is `performance`).
+  other:
+    what: >-
+      Any other quality, such as availability, uptime, reliability, fault tolerance,
+      recovery, maintainability, or portability, or a requirement that fits none of the
+      other options.

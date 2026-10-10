@@ -1,0 +1,39 @@
+{
+  "split_version": "promise_v1_split_v1",
+  "seed": 20261010,
+  "n_candidates": 2043,
+  "picked_rank": 10,
+  "test_projects": [
+    2,
+    4,
+    7,
+    9,
+    13,
+    15
+  ],
+  "excluded_from_test": [
+    "promise-0035",
+    "promise-0042"
+  ],
+  "counts": {
+    "dev": 449,
+    "test": 171,
+    "excluded": 2
+  },
+  "test_leaf_counts": {
+    "functional": 67,
+    "usability": 28,
+    "operational_constraint": 24,
+    "performance": 20,
+    "security": 19,
+    "other": 13
+  },
+  "fold_sizes": {
+    "0": 95,
+    "1": 74,
+    "2": 86,
+    "3": 74,
+    "4": 120
+  },
+  "content_hash": "224a6fa374235c45dac6f0d48d83233dbadfb090022f44e5e8bdac8e3ed651ba"
+}
