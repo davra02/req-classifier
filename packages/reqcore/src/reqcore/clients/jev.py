@@ -28,6 +28,7 @@ class JevResult:
     model_reported: str | None
     answers: dict[str, Any]
     input_tokens: int | None
+    output_tokens: int | None
     cost_usd: float | None
     latency_ms: float | None
     cached: bool
@@ -69,7 +70,7 @@ class JevClient:
         if (hit := self.cache.get(key)) is not None:
             return JevResult(
                 key, hit.model_reported, hit.response["answers"], hit.input_tokens,
-                hit.cost_usd, hit.latency_ms, cached=True,
+                hit.output_tokens, hit.cost_usd, hit.latency_ms, cached=True,
             )
 
         self.budget.ensure_affordable(self.model, self.estimate_cost(state, question_set))
@@ -101,5 +102,6 @@ class JevClient:
             latency_ms=latency_ms,
         )
         return JevResult(
-            key, response.model, body["answers"], input_tokens, cost, latency_ms, cached=False
+            key, response.model, body["answers"], input_tokens, response.usage.output_tokens,
+            cost, latency_ms, cached=False,
         )

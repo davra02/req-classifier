@@ -680,6 +680,20 @@ de TypeSafe.
 | **Hosting (fases 3–4)** | FastAPI + Postgres + Next.js con planes gratuitos | **$0 objetivo**; fuera del tope de $10 si en algún momento hiciera falta un plan de pago |
 | **Anotación** | Calidad: A ~10 h, B ~3 h. Set fresco: ~1,5 h cada uno. Adjudicación: ~2 h | Tiempo, no dinero |
 
+**Medido en el smoke test (2026-10-10; 20 llamadas a Jev, 20 a Haiku y 3 a Opus sobre dev; $0.0195 en total):**
+
+| Sistema | Tokens entrada / salida (media) | Latencia p50 / p95 | Coste por 1.000 requisitos | Proyección fase 1 |
+|---|---|---|---|---|
+| Jev `jev-1.13.0` (llamada completa: `req_type` + J4 + puertas, con ejemplos) | 2.126 / 179 (salida gratis) | 312 / 742 ms | **$0.089** | ~11.000 llamadas → **≈ $1.0** |
+| Haiku 5.5 (sin pensamiento, esfuerzo low) | 1.209 / 11 | 1.408 / 2.746 ms | **$0.126** | ~6.700 llamadas → ≈ $0.85 (≈ $0.5 con Batch) |
+| Opus 5.5 (esfuerzo low; no usó pensamiento) | 1.214 / 10 | 2.367 / 2.483 ms | **$5.1** | 325 llamadas → ≈ $1.65 (≈ $0.85 con Batch) |
+
+La llamada de Jev usa el doble de tokens de lo estimado, porque lleva las 5 preguntas con sus
+criterios y ejemplos, pero sigue siendo la más barata. **Proyección total de la fase 1: ≈ $2.5–3.5.**
+La API aceptó la versión fijada (`response.model == "jev-1.13.0"`) y Haiku aceptó el pensamiento
+desactivado. Los aciertos de estas 20 muestras (Jev 18/20, Haiku 16/20, Opus 3/3) son solo una
+comprobación de que todo funciona, no un resultado.
+
 **Cómo se garantiza el tope:**
 
 1. **Límite de gasto en la Claude Console**, en el workspace del proyecto: es el corte duro en el servidor.

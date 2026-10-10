@@ -10,8 +10,28 @@ medido es válido. Plan completo: `docs/PLAN.md`. El usuario se comunica en espa
 - Fase 0 en curso. Hecho: workspace `uv` (Python 3.12; `packages/reqcore` + `bench`), clientes Jev y
   Claude con caché y presupuesto, datos (`uv run reqbench data all`), splits congelados (hash
   `224a6fa3…`), ejemplos `examples_v1`, `docs/DATA_CARD.md`, `docs/PREREGISTRATION.md`, 13 tests en verde.
-  Pendiente: commit del prerregistro y los splits (antes de ejecutar ningún modelo), smoke test
-  (`uv run reqbench smoke --run`, pide aprobación del usuario) y recogida del set fresco.
+  Primer commit `345a5b7` (prerregistro + splits) publicado en https://github.com/davra02/req-classifier
+  (público). Smoke test hecho: $0.0195; Jev ~2.126 tokens/llamada, p50 312 ms; Haiku p50 1,4 s;
+  Opus p50 2,4 s; `jev-1.13.0` aceptado (cifras en `docs/PLAN.md` §8.1).
+- **Git:** pedir confirmación antes de cada commit o push (la autorización del primero no se extiende).
+
+## Próximos pasos (en este orden)
+1. **Set fresco** (tarea del usuario con ayuda): instrucciones y plantillas en `data/fresh/README.md`,
+   `documents.csv` y `requirements.csv`. ~150 requisitos de ≥ 5 documentos de 2025 en adelante,
+   doble anotación. Congelar con un commit antes de evaluar nada sobre él. Puede ir en paralelo a lo
+   siguiente.
+2. **Fase 1, baselines baratos en dev** (sin coste): B0 mayoritaria, B1 reglas por palabras clave
+   (listas construidas solo con dev), B2 TF-IDF+LR, B3 `BAAI/bge-small-en-v1.5`+LR. CV con los 5 folds
+   de `promise_v1_split_v1`, excluyendo los IDs de `examples_v1` de las métricas. Guardar las
+   predicciones fuera de fold (probabilidades) para calibración. Añadir un módulo `reqbench/eval/`
+   (macro-F1, F1 por nivel, ECE, AURC y bootstrap).
+3. **B4 DeBERTa-v3-small** en MPS (M4, fp32), 5 semillas.
+4. **Jev en dev:** J1/J2 (rotaciones 0, 1 y 2 de `jev_type_v1`), J4 y J3 (stacking). ~1.350 llamadas,
+   ≈ $0.12. Mostrar la estimación con *dry run* antes de ejecutar.
+5. **Haiku en dev** con k = 5 (Batch API para lo que no mide latencia); iteración de prompts solo
+   sobre un subconjunto de 150 de dev; máximo 15 versiones registradas.
+6. Calibración, umbrales, congelación, **test una sola vez** (+ fresco) e informe
+   `docs/reports/phase1/REPORT.md`.
 - Comandos: `uv run reqbench data all|download|build|split|examples` · `uv run reqbench budget` ·
   `uv run reqbench smoke [--run]` · `uv run --group dev pytest -q` · `uv run --group dev ruff check packages bench`. **La fase 1 (MVP) es SOLO el benchmark de tipo sobre PROMISE, con su
   informe. Nada de servicio ni interfaz hasta tener la decisión de la fase 1.**
