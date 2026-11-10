@@ -6,7 +6,7 @@ git history of this file is the audit trail.
 
 ## Question
 
-Does Jev (`jev-1.13.0`) classify requirement types well enough, cheaply enough and reliably
+Does Jev (`jev-1.14.0`; `jev-1.13.0` until deviation 2) classify requirement types well enough, cheaply enough and reliably
 enough to be used instead of simpler or cheaper alternatives? A negative or inconclusive
 answer is a valid outcome.
 
@@ -78,7 +78,7 @@ report states the sample size that would be needed to separate them.
 
 ## Version policy
 
-Jev is pinned to `jev-1.13.0`; a response reporting another model aborts the run. If the
+Jev is pinned to `jev-1.14.0` (see deviation 2); a response reporting another model aborts the run. If the
 pinned version becomes unavailable, all Jev results are rerun on dev, recalibrated and
 re-evaluated as a new, separately logged evaluation.
 
@@ -97,3 +97,15 @@ re-evaluated as a new, separately logged evaluation.
    A **reserve** subsample of 30 for annotator D was drawn the same way from the remaining
    110 rows (`reqbench fresh assign --who d`, seed 20261010). It is used only if a further
    annotator is available; if used, its rows join the double-annotated set and the pooled κ.
+
+2. **2026-11-10, Jev version** (decided before any Jev result on dev, test or the fresh set
+   existed; the only Jev calls made with `jev-1.13.0` were the 20 smoke-test calls of phase 0).
+   Planned: `jev-1.13.0`. Done instead: `jev-1.14.0`, pinned by its versioned ID with the same
+   abort rule. Reason: TypeSafe released Jev 1.14 on 2026-10-14 and the `jev-latest` and
+   `jev-preview` aliases now point to it; measuring the superseded version would make the
+   result less relevant, and a later retirement of 1.13 would force a full rerun, including
+   the test. Price ($0.042 per million input tokens) and API are unchanged; the changelog lists
+   no change to Choice or Noul and the documented failure modes (including first-option bias)
+   are the same, so the robustness measures stay as planned. Only one version is evaluated:
+   1.13 is not run on dev, so the version is not chosen by its results. A phase-0-style smoke
+   test on 1.14 (20 dev calls) confirmed that the API answers with `jev-1.14.0`.

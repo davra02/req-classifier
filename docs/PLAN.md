@@ -2,6 +2,7 @@
 
 > Estado: v2 · 2026-10-10 · Incorpora las respuestas a las preguntas P1–P8 (§1). Ninguna línea de código escrita todavía.
 > Documentación de Jev revisada el 2026-10-10 (Jev 1.13, página de *jaggedness* fechada el 2026-10-02).
+> **2026-11-10: Jev fijado a `jev-1.14.0`** (desviación 2 de `docs/PREREGISTRATION.md`; revisada la documentación en vivo ese día).
 
 Este plan tiene un objetivo doble: construir un sistema que clasifica requisitos y evalúa su calidad,
 y **demostrar con medidas si Jev aporta valor** frente a alternativas más baratas o más simples. Un
@@ -15,7 +16,7 @@ resultado negativo bien medido es un entregable válido y el diseño final depen
 
 | Aspecto | Dato | Implicación para el proyecto |
 |---|---|---|
-| Modelo actual | `jev-1.13.0`; los alias `jev-latest` y `jev-preview` apuntan a él | Fijar siempre `jev-1.13.0`, nunca el alias. Guardar el campo `model` de la respuesta en cada inferencia. |
+| Modelo actual | `jev-1.14.0` (desde el 2026-10-14); los alias `jev-latest` y `jev-preview` apuntan a él. `jev-1.13.0` se sigue sirviendo sin fecha de retirada | Fijar siempre `jev-1.14.0` (era `jev-1.13.0` hasta el 2026-11-10), nunca el alias. Guardar el campo `model` de la respuesta en cada inferencia. |
 | Precio | $0.042 por millón de tokens de entrada; la salida es gratis | El coste de Jev será prácticamente despreciable. El factor limitante es el rate limit, no el dinero. |
 | Rate limits | 100K tokens/s y 80 req/s; **cambian dinámicamente sin aviso** | Concurrencia moderada, reintentos con backoff (el SDK de Python ya lo hace para 429/529) y caché obligatoria. |
 | Contexto | 64k tokens por request; 32k para `state` + la pregunta más larga | No limita: un requisito tiene unos 17 palabras de mediana y 84 como máximo. |
@@ -23,7 +24,7 @@ resultado negativo bien medido es un entregable válido y el diseño final depen
 | Preguntas | Se evalúan en paralelo y de forma aislada contra el mismo `state` | Todas las preguntas de un requisito van en una sola llamada sin contaminarse entre sí. |
 | Calibración | TypeSafe afirma que el modelo está entrenado (RLCD) para dar probabilidades calibradas, «medidas sobre grupos» | **No lo asumimos**: lo medimos (ECE antes y después de recalibrar). |
 | No determinismo | En su propio cookbook de auto-consistencia, la desviación típica media de los Noul es ~0.01 y Choice repite su etiqueta modal el 90.8 % de las veces (cambia en 2 de 8 preguntas) | La caché hace reproducibles los experimentos, pero **guarda una sola muestra**. Hay que medir la estabilidad entre ejecuciones de forma explícita. |
-| Fallos conocidos (1.13) | Lectura literal; números y conteo; indirección; estado grande con ruido; **contenido adversarial puede mover la respuesta**; instrucciones y criterios contradictorios; **sesgo hacia la primera opción de un Choice**; no genera texto | Contar en código; preguntas directas y atómicas; un requisito por `state`; prueba de permutación de opciones; suite adversarial; nada de generación con Jev. |
+| Fallos conocidos (página *jaggedness*, sin versión desde la 1.14; misma lista) | Lectura literal; números y conteo; indirección; estado grande con ruido; **contenido adversarial puede mover la respuesta**; instrucciones y criterios contradictorios; **sesgo hacia la primera opción de un Choice**; no genera texto | Contar en código; preguntas directas y atómicas; un requisito por `state`; prueba de permutación de opciones; suite adversarial; nada de generación con Jev. |
 | Personalización | Sin fine-tuning: el dominio se codifica en `instructions` y `criteria`; para composición aprendida recomiendan usar las probabilidades como *features* de un modelo clásico | Justifica la variante «Jev + LR» (stacking) del benchmark. |
 | Idioma | El inglés es su idioma principal | Primera versión solo en inglés (ya estaba en el alcance). |
 | SDKs | Python (`typesafe_sdk`) y JavaScript (`@typesafe-ai/sdk`). **No hay SDK de Java** | Uno de los motivos para hacer el servicio en Python (FastAPI) con el SDK oficial, que ya trae reintentos con backoff (§5.4). |
@@ -693,6 +694,10 @@ criterios y ejemplos, pero sigue siendo la más barata. **Proyección total de l
 La API aceptó la versión fijada (`response.model == "jev-1.13.0"`) y Haiku aceptó el pensamiento
 desactivado. Los aciertos de estas 20 muestras (Jev 18/20, Haiku 16/20, Opus 3/3) son solo una
 comprobación de que todo funciona, no un resultado.
+
+**Smoke test de `jev-1.14.0` (2026-11-10; las mismas 20 llamadas, solo Jev, $0.0018):** la API respondió
+`jev-1.14.0` en todas; 2.126 / 179 tokens de media (igual que la 1.13); latencia p50 / p95 de
+161 / 231 ms. Coste por 1.000 requisitos sin cambios ($0.089).
 
 **Cómo se garantiza el tope:**
 

@@ -13,7 +13,7 @@ from reqcore.pricing import cost_usd
 from reqcore.questions import JevQuestionSet
 
 PROVIDER = "typesafe"
-PINNED_MODEL = "jev-1.13.0"
+PINNED_MODEL = "jev-1.14.0"  # 1.13.0 until 2026-11-10 (preregistration deviation 2)
 # Conservative characters-per-token ratio for the pre-call cost estimate.
 _CHARS_PER_TOKEN = 3.0
 
@@ -52,6 +52,36 @@ class JevClient:
         chars = len(canonical_json({"state": state, "questions": question_set.questions}))
         return cost_usd(self.model, int(chars / _CHARS_PER_TOKEN), 0)
 
+    @staticmethod
+    def _with_nonce(state: dict[str, Any], nonce: str | None) -> dict[str, Any]:
+        return state if nonce is None else {**state, "uid": nonce}
+
+    def key(
+        self,
+        state: dict[str, Any],
+        question_set: JevQuestionSet,
+        sample_index: int = 0,
+        nonce: str | None = None,
+    ) -> str:
+        state = self._with_nonce(state, nonce)
+        return cache_key(PROVIDER, self.model, question_set.hash, state, sample_index)
+
+    def cached(
+        self,
+        state: dict[str, Any],
+        question_set: JevQuestionSet,
+        sample_index: int = 0,
+        nonce: str | None = None,
+    ) -> JevResult | None:
+        """The cached result for this request, or None. Never calls the API."""
+        key = self.key(state, question_set, sample_index, nonce)
+        if (hit := self.cache.get(key)) is None:
+            return None
+        return JevResult(
+            key, hit.model_reported, hit.response["answers"], hit.input_tokens,
+            hit.output_tokens, hit.cost_usd, hit.latency_ms, cached=True,
+        )  # fmt: skip
+
     def ask(
         self,
         state: dict[str, Any],
@@ -64,14 +94,10 @@ class JevClient:
         `nonce` adds a throwaway `uid` field to the state so that deliberate repeats are
         independent draws (the pattern TypeSafe uses in its self-consistency cookbooks).
         """
-        if nonce is not None:
-            state = {**state, "uid": nonce}
+        if (hit := self.cached(state, question_set, sample_index, nonce)) is not None:
+            return hit
+        state = self._with_nonce(state, nonce)
         key = cache_key(PROVIDER, self.model, question_set.hash, state, sample_index)
-        if (hit := self.cache.get(key)) is not None:
-            return JevResult(
-                key, hit.model_reported, hit.response["answers"], hit.input_tokens,
-                hit.output_tokens, hit.cost_usd, hit.latency_ms, cached=True,
-            )
 
         self.budget.ensure_affordable(self.model, self.estimate_cost(state, question_set))
         started = time.perf_counter()

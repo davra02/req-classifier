@@ -12,7 +12,9 @@ medido es válido. Plan completo: `docs/PLAN.md`. El usuario se comunica en espa
   `224a6fa3…`), ejemplos `examples_v1`, `docs/DATA_CARD.md`, `docs/PREREGISTRATION.md`, 52 tests en verde.
   Primer commit `345a5b7` (prerregistro + splits) publicado en https://github.com/davra02/req-classifier
   (público). Smoke test hecho: $0.0195; Jev ~2.126 tokens/llamada, p50 312 ms; Haiku p50 1,4 s;
-  Opus p50 2,4 s; `jev-1.13.0` aceptado (cifras en `docs/PLAN.md` §8.1).
+  Opus p50 2,4 s; `jev-1.13.0` aceptado (cifras en `docs/PLAN.md` §8.1). **2026-11-10: cambio a
+  `jev-1.14.0`** antes de cualquier resultado de Jev (desviación 2 del prerregistro); smoke de
+  20 llamadas: responde `jev-1.14.0`, 2.126 tokens/llamada, p50 161 ms.
 - **Git:** pedir confirmación antes de cada commit o push (la autorización del primero no se extiende).
 
 ## Próximos pasos (en este orden)
@@ -66,7 +68,7 @@ medido es válido. Plan completo: `docs/PLAN.md`. El usuario se comunica en espa
   - `ANTHROPIC_API_KEY`: API de Anthropic directa, con $10 de créditos cargados el 2026-10-10.
     Verificada con `GET /v1/models`; la cuenta tiene acceso a `claude-haiku-5-5` y `claude-opus-5-5`.
   - `AI_GATEWAY_API_KEY`: clave de Vercel AI Gateway. **No se usa** en el proyecto.
-- **Decidido:** Jev se llama **directamente a TypeSafe** fijando `jev-1.13.0` (nunca por el gateway de
+- **Decidido:** Jev se llama **directamente a TypeSafe** fijando `jev-1.14.0` (nunca por el gateway de
   Vercel: allí solo existe el alias `typesafe-ai/jev`, sin versión). Claude (Haiku 5.5 / Opus 5.5) se llama
   por la **API de Anthropic directa**, con Batch API disponible. Los otros modelos de decisión del gateway
   quedan fuera del alcance (posible extensión futura). No ejecutar `npx vercel ai-gateway setup`.
@@ -116,7 +118,7 @@ medido es válido. Plan completo: `docs/PLAN.md`. El usuario se comunica en espa
 - **Presupuesto:** toda ejecución que llame a APIs pasa por la guarda de `reqcore/budget.py` (*dry run*
   con estimación y subtopes: Jev $2, Haiku $2, Opus $3, reserva $3). Antes de cualquier corrida con
   coste, mostrar la estimación al usuario.
-- **Jev fijado a `jev-1.13.0`**, nunca `jev-latest` ni `jev-preview`. Guardar `response.model`, el
+- **Jev fijado a `jev-1.14.0`** (era 1.13.0 hasta el 2026-11-10), nunca `jev-latest` ni `jev-preview`. Guardar `response.model`, el
   `usage` y la latencia en cada inferencia. Si cambia la versión: re-ejecutar dev, recalibrar, re-fijar
   umbrales y nueva evaluación en test.
 - **Jev no es determinista** (σ ≈ 0.01 en Noul; Choice cambia de etiqueta en casos frontera). La clave
@@ -138,7 +140,7 @@ medido es válido. Plan completo: `docs/PLAN.md`. El usuario se comunica en espa
 - **Nunca se modifican las etiquetas de test.** Las auditorías de ruido se reportan aparte.
 
 ## Hechos de referencia (verificados el 2026-10-10)
-- Jev 1.13: $0.042/Mtok de entrada (salida gratis); 80 req/s y 100K tok/s (cambian sin aviso);
+- Jev 1.13/1.14 (mismo precio y mismos fallos documentados): $0.042/Mtok de entrada (salida gratis); 80 req/s y 100K tok/s (cambian sin aviso);
   contexto de 64k (32k para state + la pregunta más larga); Noul sin `confidence` (usar |2p−1|);
   sesgo hacia la primera opción en Choice; vulnerable a contenido adversarial; SDKs en Python y JS.
 - PROMISE: duplicado contradictorio («Only registered customers can purchase streaming movies.» SE/F);

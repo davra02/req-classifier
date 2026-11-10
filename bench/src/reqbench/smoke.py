@@ -12,7 +12,7 @@ import pandas as pd
 from reqcore.budget import Budget
 from reqcore.cache import InferenceCache
 from reqcore.clients.claude import HAIKU, OPUS, ClaudeClassifier
-from reqcore.clients.jev import JevClient
+from reqcore.clients.jev import PINNED_MODEL, JevClient
 from reqcore.paths import repo_root
 from reqcore.questions import render_jev_questions, render_llm_prompt
 
@@ -54,7 +54,7 @@ def run_smoke(n_jev: int = 20, n_haiku: int = 20, n_opus: int = 3, run: bool = F
     opus = ClaudeClassifier(OPUS, prompt, cache=cache, budget=budget)
 
     estimate = {
-        "jev-1.13.0": sum(
+        PINNED_MODEL: sum(
             jev.estimate_cost({"requirement": t}, questions) for t in sample["text"][:n_jev]
         ),
         "claude-haiku-5-5": sum(haiku.estimate_cost(t) for t in sample["text"][:n_haiku]),
@@ -84,7 +84,7 @@ def run_smoke(n_jev: int = 20, n_haiku: int = 20, n_opus: int = 3, run: bool = F
 
     report["models_reported"] = sorted({r["model_reported"] for r in jev_rows})
     report["summaries"] = [
-        _summary("jev-1.13.0 (req_type)", jev_rows),
+        _summary(f"{PINNED_MODEL} (req_type)", jev_rows),
         _summary("claude-haiku-5-5", haiku_rows),
         _summary("claude-opus-5-5", opus_rows),
     ]

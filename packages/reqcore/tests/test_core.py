@@ -4,7 +4,7 @@ import pytest
 from reqcore.budget import Budget, BudgetConfig, BudgetExceededError
 from reqcore.cache import InferenceCache, cache_key
 from reqcore.clients.claude import HAIKU, ClaudeClassifier
-from reqcore.clients.jev import JevClient, ModelVersionMismatchError
+from reqcore.clients.jev import PINNED_MODEL, JevClient, ModelVersionMismatchError
 from reqcore.normalize import dedup_key, normalize_text, text_hash
 from reqcore.pricing import cost_usd
 from reqcore.questions import render_jev_questions, render_llm_prompt
@@ -79,7 +79,7 @@ class FakeTypeSafe:
 
 
 def test_jev_client_caches_and_records_spend(tmp_path, budget):
-    fake = FakeTypeSafe("jev-1.13.0")
+    fake = FakeTypeSafe(PINNED_MODEL)
     client = JevClient(cache=InferenceCache(tmp_path / "c.sqlite"), budget=budget, client=fake)
     qs = render_jev_questions()
     first = client.ask({"requirement": "The system shall log in users."}, qs)
@@ -90,7 +90,7 @@ def test_jev_client_caches_and_records_spend(tmp_path, budget):
 
 def test_jev_client_rejects_other_model_version(tmp_path, budget):
     client = JevClient(cache=InferenceCache(tmp_path / "c.sqlite"), budget=budget,
-                       client=FakeTypeSafe("jev-1.14.0"))
+                       client=FakeTypeSafe("jev-1.13.0"))
     with pytest.raises(ModelVersionMismatchError):
         client.ask({"requirement": "x"}, render_jev_questions())
     assert budget.spent_by_bucket()["jev"] > 0  # the call was billed even though rejected

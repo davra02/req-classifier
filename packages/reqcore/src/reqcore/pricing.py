@@ -15,6 +15,8 @@ class Price:
 
 PRICES: dict[str, Price] = {
     # TypeSafe bills input tokens only; output tokens are free.
+    "jev-1.14.0": Price(input_per_mtok=0.042, output_per_mtok=0.0, budget_bucket="jev"),
+    # Pinned until 2026-11-10 (smoke test only); kept so the spend ledger stays readable.
     "jev-1.13.0": Price(input_per_mtok=0.042, output_per_mtok=0.0, budget_bucket="jev"),
     # Haiku 5.5 price applies to prompts up to 100K tokens; ours are ~1K.
     "claude-haiku-5-5": Price(input_per_mtok=0.10, output_per_mtok=0.50, budget_bucket="haiku"),

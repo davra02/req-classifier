@@ -58,7 +58,7 @@ def test_bootstrap_is_deterministic_and_paired():
     assert first["ci95"][0] <= first["value"] <= first["ci95"][1]
     same = bootstrap.paired_difference(lambda i: values[i].mean(), lambda i: values[i].mean(),
                                        len(values), n_resamples=200)  # fmt: skip
-    assert same == {"value": 0.0, "ci95": [0.0, 0.0]}
+    assert same == {"value": 0.0, "ci95": [0.0, 0.0], "p_two_sided": 1.0}
 
 
 def test_keywords_use_stems_phrases_priority_and_default():

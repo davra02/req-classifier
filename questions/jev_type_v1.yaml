@@ -4,7 +4,7 @@
 # average out first-option bias (variants J1/J2).
 version: jev_type_v1
 taxonomy: taxonomy_v1
-model: jev-1.13.0
+model: jev-1.14.0
 
 # State shape: {"requirement": "<normalized text>"}. User text never enters instructions.
 choices:

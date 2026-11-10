@@ -185,6 +185,35 @@ def cmd_baselines(args: argparse.Namespace) -> None:
     print(pd.DataFrame(rows).to_string(index=False))
 
 
+def cmd_jev(args: argparse.Namespace) -> None:
+    from reqbench.eval.jev_dev import run_jev_dev
+
+    report = run_jev_dev(run=args.run, rotations=tuple(args.rotations),
+                         n_samples=args.samples, workers=args.workers,
+                         n_resamples=args.n_resamples)  # fmt: skip
+    if "dry_run" in report:
+        _print(report["dry_run"])
+        print("Dry run: no API call made. Re-run with --run to make the calls above.")
+        return
+    rows = []
+    for name, summary in report["summaries"].items():
+        ci = summary["ci"]
+
+        def fmt(metric: str, ci: dict = ci) -> str:
+            v, (lo, hi) = ci[metric]["value"], ci[metric]["ci95"]
+            return f"{v:.3f} [{lo:.3f}, {hi:.3f}]"
+
+        diff = report["comparisons"][name].get("B3_bge_small_lr", {}).get("macro_f1")
+        rows.append({"system": name, "macro_f1": fmt("macro_f1"), "level1_f1": fmt("level1_f1"),
+                     "ece": fmt("ece"), "aurc": fmt("aurc"), "cov@95": fmt("coverage_at_95"),
+                     "vs_B3": (f"{diff['value']:+.3f} [{diff['ci95'][0]:+.3f}, "
+                               f"{diff['ci95'][1]:+.3f}]") if diff else "—"})  # fmt: skip
+    import pandas as pd
+
+    print(pd.DataFrame(rows).to_string(index=False))
+    _print({k: report[k] for k in ("usage", "stability", "order")})
+
+
 def main() -> None:
     load_env()
     parser = argparse.ArgumentParser(prog="reqbench")
@@ -234,6 +263,14 @@ def main() -> None:
                       default=["b0", "b1", "b2", "b3"])  # fmt: skip
     base.add_argument("--n-resamples", type=int, default=10_000)
     base.set_defaults(func=cmd_baselines)
+
+    jevp = sub.add_parser("jev", help="phase 1: Jev J1-J4 on dev (dry run unless --run)")
+    jevp.add_argument("--run", action="store_true", help="make real (paid) API calls")
+    jevp.add_argument("--rotations", type=int, nargs="+", default=[0, 1, 2])
+    jevp.add_argument("--samples", type=int, default=5, help="samples of rotation 0")
+    jevp.add_argument("--workers", type=int, default=8)
+    jevp.add_argument("--n-resamples", type=int, default=10_000)
+    jevp.set_defaults(func=cmd_jev)
 
     args = parser.parse_args()
     args.func(args)
