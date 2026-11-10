@@ -147,6 +147,44 @@ def _fresh_agreement(args: argparse.Namespace) -> None:
     print(f"Saved {len(labels)} labels to annotator_{args.who}.")
 
 
+def cmd_baselines(args: argparse.Namespace) -> None:
+    from reqbench.eval import cv
+    from reqbench.models import baselines
+    from reqbench.models.embeddings import CachedEmbedder
+
+    factories = {
+        "b0": baselines.Majority,
+        "b1": baselines.Keywords,
+        "b2": baselines.TfidfLR,
+        "b3": lambda: baselines.EmbedLR(embedder),
+    }
+    embedder = CachedEmbedder() if "b3" in args.systems else None
+    dev = cv.load_dev()
+    rows = []
+    for key in args.systems:
+        oof, params = cv.run_cv(factories[key], dev)
+        summary = cv.evaluate(oof, n_resamples=args.n_resamples)
+        name = factories[key]().name if key != "b3" else baselines.EmbedLR.name
+        cv.save(name, oof, params, summary)
+        ci = summary["ci"]
+
+        def fmt(metric: str, ci: dict = ci) -> str:
+            if metric not in ci:
+                return "—"
+            v, (lo, hi) = ci[metric]["value"], ci[metric]["ci95"]
+            return f"{v:.3f} [{lo:.3f}, {hi:.3f}]"
+
+        rows.append({"system": name, "macro_f1": fmt("macro_f1"), "level1_f1": fmt("level1_f1"),
+                     "level2_f1": fmt("level2_macro_f1"), "ece": fmt("ece"),
+                     "aurc": fmt("aurc"), "cov@95": fmt("coverage_at_95")})  # fmt: skip
+        print(f"{name}: done (fold params: {params})")
+    import pandas as pd
+
+    print(f"\nDev CV, n = {int((~dev['is_example']).sum())} (examples_v1 excluded); "
+          f"bootstrap {args.n_resamples} resamples. Saved to {cv.runs_dir()}")  # fmt: skip
+    print(pd.DataFrame(rows).to_string(index=False))
+
+
 def main() -> None:
     load_env()
     parser = argparse.ArgumentParser(prog="reqbench")
@@ -190,6 +228,12 @@ def main() -> None:
     fresh.add_argument("--file", help="reply: read the reply from this file")
     fresh.add_argument("--out", help="form: output HTML path (default data/raw/fresh/)")
     fresh.set_defaults(func=cmd_fresh)
+
+    base = sub.add_parser("baselines", help="phase 1: B0-B3 cross-validated on dev (no cost)")
+    base.add_argument("--systems", nargs="+", choices=["b0", "b1", "b2", "b3"],
+                      default=["b0", "b1", "b2", "b3"])  # fmt: skip
+    base.add_argument("--n-resamples", type=int, default=10_000)
+    base.set_defaults(func=cmd_baselines)
 
     args = parser.parse_args()
     args.func(args)

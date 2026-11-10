@@ -8,6 +8,8 @@ dependencies = [
     "numpy>=2.0",
     "pandas>=2.2",
     "scikit-learn>=1.5",
+    "sentence-transformers>=3.0",
+    "pyyaml>=6.0",
 ]
 
 [project.scripts]

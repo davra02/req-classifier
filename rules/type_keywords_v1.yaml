@@ -1,0 +1,89 @@
+# B1 keyword baseline for requirement type (plan §4.3). Benchmark only.
+# Written from the plan's seed lists plus obvious word forms, without looking at the test split.
+# Changes may only be based on dev; every version is kept (type_keywords_v2, ...).
+# Deviations from the seed lists: bare "users" and "access" are too broad (most functional
+# requirements mention users or access), so only phrases such as "concurrent users" and
+# "access control" are used.
+#
+# Matching: case-insensitive, whole words; a trailing "*" matches any word ending.
+# Conflicts: the first class in `priority` that matches wins; no match -> `default`.
+version: type_keywords_v1
+default: functional
+priority: [security, performance, usability, operational_constraint, other]
+keywords:
+  performance:
+    - response time*
+    - respond within
+    - second*
+    - millisecond*
+    - minute*
+    - throughput
+    - concurrent users
+    - simultaneous users
+    - number of users
+    - transactions per
+    - per second
+    - latency
+    - load time
+    - capacity
+  security:
+    - password*
+    - authori*
+    - unauthori*
+    - authenticat*
+    - encrypt*
+    - login*
+    - log in
+    - log on
+    - access control
+    - access right*
+    - permission*
+    - privilege*
+    - secure
+    - security
+    - confidential*
+  usability:
+    - easy
+    - easily
+    - ease of use
+    - learn*
+    - intuitive*
+    - user friendly
+    - user-friendly
+    - color*
+    - colour*
+    - font*
+    - look and feel
+    - appealing
+    - attractive
+    - understand*
+    - training
+  operational_constraint:
+    - comply
+    - complian*
+    - regulation*
+    - standard*
+    - operating system*
+    - windows
+    - linux
+    - browser*
+    - interface with
+    - platform*
+    - legal*
+    - law*
+  other:
+    - available
+    - availability
+    - uptime
+    - 24x7
+    - 24/7
+    - recover*
+    - failure*
+    - fault*
+    - maintain*
+    - maintainab*
+    - portable
+    - portab*
+    - reliab*
+    - backup*
+    - downtime

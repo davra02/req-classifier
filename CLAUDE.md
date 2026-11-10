@@ -9,31 +9,51 @@ medido es válido. Plan completo: `docs/PLAN.md`. El usuario se comunica en espa
 - 2026-10-10: plan v2; las preguntas P1–P8 están resueltas (`docs/PLAN.md` §1).
 - Fase 0 en curso. Hecho: workspace `uv` (Python 3.12; `packages/reqcore` + `bench`), clientes Jev y
   Claude con caché y presupuesto, datos (`uv run reqbench data all`), splits congelados (hash
-  `224a6fa3…`), ejemplos `examples_v1`, `docs/DATA_CARD.md`, `docs/PREREGISTRATION.md`, 13 tests en verde.
+  `224a6fa3…`), ejemplos `examples_v1`, `docs/DATA_CARD.md`, `docs/PREREGISTRATION.md`, 52 tests en verde.
   Primer commit `345a5b7` (prerregistro + splits) publicado en https://github.com/davra02/req-classifier
   (público). Smoke test hecho: $0.0195; Jev ~2.126 tokens/llamada, p50 312 ms; Haiku p50 1,4 s;
   Opus p50 2,4 s; `jev-1.13.0` aceptado (cifras en `docs/PLAN.md` §8.1).
 - **Git:** pedir confirmación antes de cada commit o push (la autorización del primero no se extiende).
 
 ## Próximos pasos (en este orden)
-1. **Set fresco** (tarea del usuario con ayuda): instrucciones y plantillas en `data/fresh/README.md`,
-   `documents.csv` y `requirements.csv`. ~150 requisitos de ≥ 5 documentos de 2025 en adelante,
-   doble anotación. Congelar con un commit antes de evaluar nada sobre él. Puede ir en paralelo a lo
-   siguiente.
-2. **Fase 1, baselines baratos en dev** (sin coste): B0 mayoritaria, B1 reglas por palabras clave
-   (listas construidas solo con dev), B2 TF-IDF+LR, B3 `BAAI/bge-small-en-v1.5`+LR. CV con los 5 folds
-   de `promise_v1_split_v1`, excluyendo los IDs de `examples_v1` de las métricas. Guardar las
-   predicciones fuera de fold (probabilidades) para calibración. Añadir un módulo `reqbench/eval/`
-   (macro-F1, F1 por nivel, ECE, AURC y bootstrap).
-3. **B4 DeBERTa-v3-small** en MPS (M4, fp32), 5 semillas.
-4. **Jev en dev:** J1/J2 (rotaciones 0, 1 y 2 de `jev_type_v1`), J4 y J3 (stacking). ~1.350 llamadas,
-   ≈ $0.12. Mostrar la estimación con *dry run* antes de ejecutar.
+1. **Set fresco: anotación.** La recogida está hecha (2026-10-11, `uv run reqbench fresh collect`,
+   reglas en `data/fresh/README.md`): 2.963 repos → 310 documentos elegibles → **12 documentos,
+   170 frases** (≤ 15 por documento, semilla 20261010, hash `f1dd10eb…` en
+   `data/manifests/fresh_v1.json`). Lección: la búsqueda por nombre de repo devuelve herramientas
+   *sobre* SRS; la búsqueda de código (`SRS.md`, `requirements.md`…) encuentra SRS de productos.
+   La instantánea está en `data/raw/fresh/` (no versionada); sin `--refresh` la selección es
+   reproducible. Anotación (desviación del prerregistro del 2026-11-10): A (el usuario) anotó las
+   170; B y C (y D de reserva) anotan una submuestra disjunta de 30 cada uno (`fresh assign` hecho;
+   formularios web publicados con `fresh form`, enlaces en `data/fresh/README.md` → respuesta por
+   WhatsApp `1F 2S …` → `fresh reply --who b|c --paste`).
+   Después: `fresh kappa`, adjudicar las 60 (el resto = etiqueta de A) y commit para congelarlo
+   antes de evaluar nada sobre él. Puede ir en paralelo al paso 2. Limitación
+   que reportar: muchos SRS de 2025–2026 estarán escritos con LLM sin declararlo.
+2. **Fase 1, baselines baratos en dev: hecho (2026-11-10)**, `uv run reqbench baselines` (sin coste,
+   ~45 s). Módulos `reqbench/eval/` (métricas §6.3, bootstrap, CV) y `reqbench/models/` (B0–B3;
+   reglas en `rules/type_keywords_v1.yaml`; bge-small fijado a la revisión `5c38ec7c…`, CPU).
+   Predicciones fuera de fold en `runs/phase1/dev/` (no versionado). Dev CV, n = 437:
+   macro-F1 B0 0,099 · B1 0,514 · B2 0,577 [0,522; 0,627] · B3 **0,617** [0,565; 0,665];
+   nivel 1: B3 0,807 frente a B2 0,695. B3 − B2 = +0,040 [−0,017; +0,098] (no separables);
+   B3 − B1 = +0,103 [+0,038; +0,168]. Ninguna regla de B1 llega a precisión 0,95 (todas
+   CANDIDATAS). B3 está infraconfiado (confianza media 0,48, acierto 0,67; ECE 0,22): pendiente
+   de calibrar en el paso 6. Los hiperparámetros cambian entre folds (dev pequeño).
+3. **SIGUIENTE SESIÓN: Jev en dev** (decidido el 2026-11-10: va antes que B4). J1/J2 (rotaciones
+   0, 1 y 2 de `jev_type_v1`), J4 y J3 (stacking). ~1.350 llamadas, ≈ $0.12. Antes de escribir
+   código: cargar la skill de TypeSafe y leer la documentación en vivo (API/SDK y primitivas Choice
+   y Noul). Reutilizar `reqcore/clients/jev.py` (caché + presupuesto, ya probado en el smoke test)
+   y el mismo esquema que los baselines: `reqbench/eval/cv.py` (`load_dev`, `evaluate`, `save`),
+   predicciones fuera de fold en `runs/phase1/dev/` y comparación pareada con B3 (listón: macro-F1
+   0,617). Jev no se entrena: J1/J2/J4 predicen sobre cada fila de dev directamente; solo J3
+   (LR sobre las probabilidades de Jev) necesita la CV por folds. Mostrar la estimación con
+   *dry run* antes de ejecutar y esperar el visto bueno del usuario.
+4. **B4 DeBERTa-v3-small** en MPS (M4, fp32), 5 semillas (local, sin coste, ~30–60 min).
 5. **Haiku en dev** con k = 5 (Batch API para lo que no mide latencia); iteración de prompts solo
    sobre un subconjunto de 150 de dev; máximo 15 versiones registradas.
 6. Calibración, umbrales, congelación, **test una sola vez** (+ fresco) e informe
    `docs/reports/phase1/REPORT.md`.
 - Comandos: `uv run reqbench data all|download|build|split|examples` · `uv run reqbench budget` ·
-  `uv run reqbench smoke [--run]` · `uv run --group dev pytest -q` · `uv run --group dev ruff check packages bench`. **La fase 1 (MVP) es SOLO el benchmark de tipo sobre PROMISE, con su
+  `uv run reqbench smoke [--run]` · `uv run reqbench fresh collect [--write] [--refresh]|annotate|assign|form|message|reply|kappa` · `uv run reqbench baselines [--systems b0 b1 b2 b3]` · `uv run --group dev pytest -q` · `uv run --group dev ruff check packages bench`. **La fase 1 (MVP) es SOLO el benchmark de tipo sobre PROMISE, con su
   informe. Nada de servicio ni interfaz hasta tener la decisión de la fase 1.**
 - El usuario acepta el presupuesto de créditos de API (≤ $10).
 - **Credenciales en `.env.local`** (nunca imprimir sus valores; cargar con `set -a; . ./.env.local; set +a`;
