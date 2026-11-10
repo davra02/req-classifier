@@ -84,4 +84,16 @@ re-evaluated as a new, separately logged evaluation.
 
 ## Deviations
 
-None so far.
+1. **2026-11-10, fresh-set annotation** (decided before any system was evaluated on the fresh
+   set). Planned: two annotators label all ~150 sentences. Done instead: annotator A labels all
+   170 sentences; two further annotators, B and C, each label a **disjoint subsample of 30**
+   (60 sentences double-annotated). Subsamples are drawn with seed 20261010, stratified by A's
+   label (proportional allocation, at least 2 per label) and dealt alternately to B and C
+   (`reqbench fresh assign`). B and C receive the same leaf definitions and never see A's
+   labels. Cohen's κ (A–B, A–C, pooled; leaves and level 1, bootstrap 95 % CI) is reported on
+   these 60; their disagreements are adjudicated. For the other 110 sentences, A's label is
+   final. Reason: annotator availability. Consequence: the human agreement ceiling has a wider
+   interval, and 110 labels rest on a single annotator; both are stated with the results.
+   A **reserve** subsample of 30 for annotator D was drawn the same way from the remaining
+   110 rows (`reqbench fresh assign --who d`, seed 20261010). It is used only if a further
+   annotator is available; if used, its rows join the double-annotated set and the pooled κ.

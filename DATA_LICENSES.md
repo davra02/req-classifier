@@ -13,5 +13,8 @@ examples, with attribution in its header.
 | NICE relabeled PROMISE | Reference for deduplication and multi-label analysis | CC BY 4.0 | Rejithkumar, G., Anish, P. R. (2025). NICE [Data set]. Zenodo. https://doi.org/10.5281/zenodo.14590935 |
 | RE'19 materials (Dalpiaz et al.) | External functional/quality test set; label-noise analysis | GPL-3.0 | Dalpiaz, F., Dell'Anna, D., Aydemir, F. B., Çevikol, S. (2019). Requirements Classification with Interpretable Machine Learning and Dependency Parsing. RE'19. https://doi.org/10.5281/zenodo.3309669 |
 
-The license and provenance of every document in the fresh evaluation set (plan §6.9) will be
-recorded in `data/fresh/`.
+The fresh evaluation set (plan §6.9) quotes short requirement sentences from 12 public GitHub
+repositories under MIT or Apache-2.0 (`data/fresh/requirements.csv`). Each sentence links to
+its source through `doc_id`; `data/fresh/documents.csv` records the repository URL at the
+pinned commit, its license and the retrieval date. Copyright remains with the respective
+authors under those licenses.

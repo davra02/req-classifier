@@ -1,0 +1,58 @@
+{
+  "fresh_version": "fresh_v1",
+  "retrieved_at": "2026-10-10",
+  "search": {
+    "queries": [
+      "\"software requirements specification\" in:name,description",
+      "\"requirements specification\" in:name,description",
+      "\"software requirements\" in:name,description",
+      "\"system requirements\" in:name,description",
+      "srs in:name"
+    ],
+    "code_queries": [
+      "shall \"functional requirements\" filename:SRS.md",
+      "shall \"functional requirements\" filename:requirements.md",
+      "shall \"non-functional requirements\" path:docs extension:md",
+      "shall filename:SRS.txt"
+    ],
+    "created_since": "2025-01-01",
+    "licenses": [
+      "Apache-2.0",
+      "CC-BY-4.0",
+      "CC0-1.0",
+      "MIT"
+    ]
+  },
+  "params": {
+    "seed": 20261010,
+    "target": 170,
+    "per_doc": 15,
+    "min_doc_candidates": 10,
+    "ref_near_dup": 0.85,
+    "near_dup": 0.9,
+    "template_hits": 3,
+    "mirror_share": 0.5,
+    "generated_style_share": 0.5
+  },
+  "counts": {
+    "repos_found": 2963,
+    "repos_excluded": {
+      "license": 1740,
+      "no_document_files": 33,
+      "tool_or_template": 232,
+      "created_before_2025": 51,
+      "example_repo": 2
+    },
+    "documents_excluded": {
+      "few_candidates": 586,
+      "generated_spec_style": 8,
+      "declared_ai_generated": 1
+    },
+    "documents_eligible": 310,
+    "candidates_eligible": 27346,
+    "documents_selected": 12,
+    "requirements_selected": 170
+  },
+  "skipped_during_draw": [],
+  "content_hash": "f1dd10ebc311af42453c61eaa096b73f3d9f9d5c9316c6b4f29b446123016970"
+}

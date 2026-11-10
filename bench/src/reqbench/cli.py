@@ -2,6 +2,7 @@
 
 import argparse
 import json
+from pathlib import Path
 
 from reqcore.budget import Budget
 from reqcore.env import load_env
@@ -51,6 +52,101 @@ def cmd_smoke(args: argparse.Namespace) -> None:
     _print(run_smoke(args.n_jev, args.n_haiku, args.n_opus, run=args.run))
 
 
+def cmd_fresh(args: argparse.Namespace) -> None:
+    if args.step in ("assign", "message", "form", "reply", "kappa"):
+        _fresh_agreement(args)
+        return
+    if args.step == "annotate":
+        from reqbench.fresh.annotate import serve
+
+        serve(port=args.port, open_browser=not args.no_browser)
+        return
+    from reqbench.fresh import collect
+
+    result = collect.collect(
+        refresh=args.refresh, seed=args.seed, target=args.target, per_doc=args.per_doc
+    )
+    eligible = result.eligible
+    _print(
+        {
+            "retrieved_at": result.snapshot["retrieved_at"],
+            "repos_found": len(result.snapshot["repos"]),
+            "repos_excluded": dict(result.repo_exclusions),
+            "documents_excluded": dict(result.doc_exclusions),
+            "documents_eligible": len(eligible),
+            "candidates_eligible": sum(len(d.candidates) for d in eligible),
+            "reference_near_duplicates": sum(
+                len(d.reference_hits) for d in eligible + [d for d, _ in result.excluded_docs]
+            ),
+            "skipped_during_draw": result.selection.skipped,
+            "documents_selected": len(result.documents),
+            "requirements_selected": len(result.requirements),
+        }
+    )
+    print(result.documents[["doc_id", "license", "published_date", "max_requirements_taken",
+                            "url"]].to_string(index=False))
+    if args.show:
+        sample = result.requirements.head(args.show)  # rows are already shuffled by seed
+        for row in sample.itertuples():
+            print(f"{row.req_id} {row.doc_id} {row.location}\n    {row.text}")
+    if args.write:
+        _print(collect.write_collection(result, args.seed, args.target, args.per_doc)["counts"])
+    else:
+        print("Dry run: nothing written to data/fresh/ (use --write).")
+
+
+def _fresh_agreement(args: argparse.Namespace) -> None:
+    import subprocess
+    import sys
+
+    import pandas as pd
+
+    from reqbench.fresh import agreement
+
+    path = data_dir() / "fresh" / "requirements.csv"
+    df = pd.read_csv(path, dtype=str, keep_default_na=False)
+
+    def write(frame: pd.DataFrame) -> None:
+        tmp = path.with_suffix(".csv.part")
+        frame.to_csv(tmp, index=False)
+        tmp.replace(path)
+
+    if args.step == "kappa":
+        _print(agreement.agreement(df))
+        return
+    if args.step == "assign":
+        out = agreement.add_subset(df, args.who) if args.who else agreement.assign_subsets(df)
+        write(out)
+        assigned = out[out[agreement.ASSIGN_COLUMN] != ""]
+        _print(assigned.groupby(agreement.ASSIGN_COLUMN).size().to_dict())
+        return
+    if args.who is None:
+        raise SystemExit("--who is required")
+    if args.step == "form":
+        out = Path(args.out or data_dir() / "raw" / "fresh" / f"form_{args.who}.html")
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(agreement.render_form(df, args.who), encoding="utf-8")
+        print(f"Form for {args.who.upper()} written to {out} (publish it and send the link).")
+        return
+    if args.step == "message":
+        text = agreement.checklist_message(df, args.who)
+        if args.copy:
+            subprocess.run(["pbcopy"], input=text.encode(), check=True)
+            print(f"Checklist for {args.who.upper()} copied to the clipboard ({len(text)} chars).")
+        else:
+            print(text)
+        return
+    if args.paste:
+        reply = subprocess.run(["pbpaste"], capture_output=True, check=True).stdout.decode()
+    elif args.file:
+        reply = Path(args.file).read_text(encoding="utf-8")
+    else:
+        reply = sys.stdin.read()
+    labels = agreement.parse_reply(df, args.who, reply)
+    write(agreement.apply_reply(df, args.who, labels))
+    print(f"Saved {len(labels)} labels to annotator_{args.who}.")
+
+
 def main() -> None:
     load_env()
     parser = argparse.ArgumentParser(prog="reqbench")
@@ -69,6 +165,31 @@ def main() -> None:
     smoke.add_argument("--n-haiku", type=int, default=20)
     smoke.add_argument("--n-opus", type=int, default=3)
     smoke.set_defaults(func=cmd_smoke)
+
+    fresh = sub.add_parser(
+        "fresh", help="fresh set: collect (dry run unless --write), annotate, assign, form, "
+        "message, reply, kappa"
+    )  # fmt: skip
+    fresh.add_argument(
+        "step", choices=["collect", "annotate", "assign", "form", "message", "reply", "kappa"]
+    )
+    fresh.add_argument("--write", action="store_true", help="write data/fresh/*.csv")
+    fresh.add_argument("--refresh", action="store_true", help="re-run the GitHub search")
+    fresh.add_argument("--seed", type=int, default=20261010)
+    fresh.add_argument("--target", type=int, default=170)
+    fresh.add_argument("--per-doc", type=int, default=15)
+    fresh.add_argument("--show", type=int, default=25, help="print the first N rows")
+    fresh.add_argument("--port", type=int, default=8765, help="annotate: local port")
+    fresh.add_argument("--no-browser", action="store_true", help="annotate: do not open it")
+    fresh.add_argument(
+        "--who", choices=["b", "c", "d", "e"],
+        help="second annotator (assign: draw a reserve subsample for d or e)",
+    )  # fmt: skip
+    fresh.add_argument("--copy", action="store_true", help="message: copy to the clipboard")
+    fresh.add_argument("--paste", action="store_true", help="reply: read the clipboard")
+    fresh.add_argument("--file", help="reply: read the reply from this file")
+    fresh.add_argument("--out", help="form: output HTML path (default data/raw/fresh/)")
+    fresh.set_defaults(func=cmd_fresh)
 
     args = parser.parse_args()
     args.func(args)

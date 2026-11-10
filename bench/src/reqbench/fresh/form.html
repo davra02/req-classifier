@@ -1,0 +1,289 @@
+<title>Anotación de requisitos __WHO__</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  /* Layout: one sentence per screen, like a paper checklist card; options stacked under it. */
+  :root {
+    --paper: #f3f5f4; --card: #ffffff; --ink: #18211f; --muted: #5d6965; --line: #d5dcd9;
+    --accent: #0f6b62; --accent-soft: #dcefeb; --discard: #9b4a2c; --discard-soft: #f6e4dc;
+    --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #121816; --card: #1b2321; --ink: #e8eeec; --muted: #9aa8a3; --line: #33403c;
+      --accent: #5cc4b5; --accent-soft: #1d3a35; --discard: #e39a7a; --discard-soft: #3a2620;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #121816; --card: #1b2321; --ink: #e8eeec; --muted: #9aa8a3; --line: #33403c;
+    --accent: #5cc4b5; --accent-soft: #1d3a35; --discard: #e39a7a; --discard-soft: #3a2620;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font: 17px/1.5 var(--font-body); }
+  .wrap { max-width: 640px; margin: 0 auto; padding-block: 20px 40px;
+          padding-left: max(16px, env(safe-area-inset-left, 0px));
+          padding-right: max(16px, env(safe-area-inset-right, 0px));
+          display: grid; gap: 16px; }
+  h1 { font-size: 22px; line-height: 1.25; margin: 0; text-wrap: balance; }
+  h2 { font-size: 17px; margin: 0; }
+  p { margin: 0; }
+  .muted { color: var(--muted); }
+  .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em;
+             text-transform: uppercase; color: var(--accent); }
+  button, .btn { font: inherit; color: inherit; cursor: pointer; border-radius: 10px;
+                 border: 1px solid var(--line); background: var(--card); padding: 12px 16px;
+                 text-decoration: none; display: inline-flex; align-items: center;
+                 justify-content: center; gap: 8px; min-height: 48px; }
+  button:focus-visible, .btn:focus-visible, summary:focus-visible {
+    outline: 3px solid var(--accent); outline-offset: 2px; }
+  button:disabled { opacity: .4; cursor: default; }
+  .primary { background: var(--accent); border-color: var(--accent); color: var(--card);
+             font-weight: 700; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+          padding: 18px; display: grid; gap: 12px; min-width: 0; }
+  ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+
+  .top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+  .bar > div { height: 100%; background: var(--accent); width: 0; transition: width .2s; }
+  .sentence { font-size: 21px; line-height: 1.45; overflow-wrap: anywhere; margin: 0; }
+
+  .options { display: grid; gap: 8px; }
+  .opt { display: grid; grid-template-columns: 40px 1fr; gap: 2px 12px; text-align: left;
+         justify-content: stretch; align-items: start; padding: 12px 14px; width: 100%; }
+  .opt .letter { grid-row: span 2; width: 36px; height: 36px; border-radius: 8px;
+                 display: grid; place-items: center; font-family: var(--font-mono);
+                 font-size: 16px; border: 1px solid var(--line); background: var(--paper); }
+  .opt .name { font-weight: 700; }
+  .opt .what { font-size: 14px; color: var(--muted); }
+  .opt[aria-pressed="true"] { border: 2px solid var(--accent); background: var(--accent-soft);
+                              padding: 11px 13px; }
+  .opt[aria-pressed="true"] .letter { background: var(--accent); border-color: var(--accent);
+                                      color: var(--card); }
+  .opt.discard .name { color: var(--discard); }
+  .opt.discard[aria-pressed="true"] { border-color: var(--discard); background: var(--discard-soft); }
+  .opt.discard[aria-pressed="true"] .letter { background: var(--discard); border-color: var(--discard); }
+
+  .nav { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .dots { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 6px; }
+  .dot { min-height: 34px; padding: 0; border-radius: 8px; font-family: var(--font-mono);
+         font-size: 13px; }
+  .dot.done { background: var(--accent-soft); border-color: var(--accent); }
+  .dot.current { outline: 2px solid var(--ink); outline-offset: 1px; }
+
+  details { background: var(--card); border: 1px solid var(--line); border-radius: 14px; }
+  summary { cursor: pointer; padding: 14px 18px; font-weight: 700; }
+  .guide { display: grid; gap: 12px; padding: 0 18px 18px; }
+  .guide div { display: grid; gap: 2px; font-size: 15px; }
+  .guide .not { color: var(--muted); }
+  .guide .not b { color: var(--ink); }
+
+  textarea { width: 100%; min-height: 120px; font: 14px/1.5 var(--font-mono); color: var(--ink);
+             background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
+             padding: 10px; resize: vertical; }
+  .actions { display: grid; gap: 8px; }
+  .note { font-size: 14px; color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { .bar > div { transition: none; } }
+</style>
+
+<script type="application/json" id="form-data">__DATA__</script>
+
+<div class="wrap">
+  <section id="intro" class="wrap" style="padding: 0">
+    <p class="eyebrow">Set fresco · anotador __WHO__</p>
+    <h1>Clasifica 30 requisitos de software</h1>
+    <div class="card">
+      <ol class="steps">
+        <li>Lee cada frase y elige <b>una</b> categoría según lo que pide la frase.</li>
+        <li>Decide solo con el texto y las definiciones de cada opción (en inglés, las mismas para
+            todos los anotadores). No consultes a nadie ni a ninguna IA.</li>
+        <li>Si la frase no es un requisito (un título, una nota, una regla del proceso), elige
+            <b>D · Descartar</b>.</li>
+        <li>Al terminar, pulsa <b>Enviar por WhatsApp</b> y manda el mensaje que se abre.</li>
+      </ol>
+      <p class="note">Unos 15–20 minutos. Tu avance se guarda en este navegador si cierras la página.</p>
+      <button class="primary" id="start" type="button">Empezar</button>
+    </div>
+  </section>
+
+  <section id="work" hidden class="wrap" style="padding: 0">
+    <div class="top">
+      <p class="eyebrow">Anotador __WHO__</p>
+      <p class="mono muted" id="count"></p>
+    </div>
+    <div class="bar" aria-hidden="true"><div id="bar"></div></div>
+    <div class="card">
+      <p class="mono muted" id="pos"></p>
+      <p class="sentence" id="sentence"></p>
+    </div>
+    <div class="options" id="options" role="group" aria-label="Categoría"></div>
+    <div class="nav">
+      <button id="prev" type="button">← Anterior</button>
+      <button id="next" type="button">Siguiente →</button>
+    </div>
+    <button id="finish" class="primary" type="button" hidden>Revisar y enviar</button>
+    <div class="dots" id="dots" aria-label="Ir a la frase"></div>
+    <details>
+      <summary>Definiciones completas</summary>
+      <div class="guide" id="guide"></div>
+    </details>
+  </section>
+
+  <section id="send" hidden class="wrap" style="padding: 0">
+    <p class="eyebrow">Anotador __WHO__ · listo</p>
+    <h1>Has clasificado las 30 frases</h1>
+    <div class="card">
+      <p>Pulsa el botón, elige el chat de quien te mandó el enlace y envía el mensaje tal cual.</p>
+      <div class="actions">
+        <a class="btn primary" id="whatsapp" target="_blank" rel="noopener noreferrer">Enviar por WhatsApp</a>
+        <button id="copy" type="button">Copiar respuestas</button>
+      </div>
+      <p class="note" id="copied" aria-live="polite"></p>
+      <label class="note" for="answers">Si el botón no abre WhatsApp, copia este texto y pégalo en el chat:</label>
+      <textarea id="answers" readonly></textarea>
+    </div>
+    <button id="review" type="button">Volver a revisar</button>
+  </section>
+</div>
+
+<script>
+(() => {
+  const DATA = JSON.parse(document.getElementById("form-data").textContent);
+  const KEY = "fresh-form-" + DATA.who + "-" + DATA.items.length;
+  const $ = (id) => document.getElementById(id);
+  let answers = {};
+  let index = 0;
+
+  try { answers = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { answers = {}; }
+  const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(answers)); } catch (e) {} };
+  const answered = () => DATA.items.filter((it) => answers[it.n]).length;
+  const firstOpen = () => Math.max(0, DATA.items.findIndex((it) => !answers[it.n]));
+
+  function el(tag, cls, text) {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  // Options, guide and dots are built once with textContent: requirement text is untrusted.
+  DATA.labels.forEach((label, i) => {
+    const button = el("button", "opt" + (label.code === "D" ? " discard" : ""));
+    button.type = "button";
+    button.dataset.code = label.code;
+    button.setAttribute("aria-pressed", "false");
+    button.append(el("span", "letter", label.code), el("span", "name", label.name),
+                  el("span", "what", label.what));
+    button.addEventListener("click", () => choose(label.code));
+    $("options").append(button);
+
+    const row = el("div");
+    const head = el("span");
+    head.append(el("b", "", label.code + " · " + label.name + " "), el("span", "mono muted", label.key));
+    row.append(head, el("span", "", label.what));
+    if (label.not_for) {
+      const not = el("span", "not");
+      not.append(el("b", "", "No incluye: "), document.createTextNode(label.not_for));
+      row.append(not);
+    }
+    $("guide").append(row);
+  });
+  DATA.items.forEach((item, i) => {
+    const dot = el("button", "dot", String(item.n));
+    dot.type = "button";
+    dot.setAttribute("aria-label", "Frase " + item.n);
+    dot.addEventListener("click", () => { index = i; render(); });
+    $("dots").append(dot);
+  });
+
+  function render() {
+    const item = DATA.items[index];
+    const done = answered();
+    $("count").textContent = done + " / " + DATA.items.length;
+    $("bar").style.width = (100 * done / DATA.items.length) + "%";
+    $("pos").textContent = "Frase " + item.n + " de " + DATA.items.length;
+    $("sentence").textContent = item.text;
+    document.querySelectorAll(".opt").forEach((b) =>
+      b.setAttribute("aria-pressed", String(b.dataset.code === answers[item.n])));
+    document.querySelectorAll(".dot").forEach((d, i) => {
+      d.classList.toggle("done", Boolean(answers[DATA.items[i].n]));
+      d.classList.toggle("current", i === index);
+    });
+    $("prev").disabled = index === 0;
+    $("next").disabled = index === DATA.items.length - 1;
+    $("finish").hidden = done < DATA.items.length;
+  }
+
+  function choose(code) {
+    const item = DATA.items[index];
+    answers[item.n] = code;
+    persist();
+    render();
+    if (answered() === DATA.items.length) return;
+    setTimeout(() => {
+      // Move to the next unanswered sentence after this one, wrapping around.
+      for (let step = 1; step <= DATA.items.length; step++) {
+        const j = (index + step) % DATA.items.length;
+        if (!answers[DATA.items[j].n]) { index = j; break; }
+      }
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, 220);
+  }
+
+  function replyText() {
+    const parts = DATA.items.map((it) => it.n + answers[it.n]);
+    const lines = [];
+    for (let i = 0; i < parts.length; i += 10) lines.push(parts.slice(i, i + 10).join(" "));
+    return "Respuestas del anotador " + DATA.who + ":\n" + lines.join("\n");
+  }
+
+  function showSend() {
+    const text = replyText();
+    $("answers").value = text;
+    $("whatsapp").href = "https://wa.me/?text=" + encodeURIComponent(text);
+    $("copied").textContent = "";
+    $("work").hidden = true; $("intro").hidden = true; $("send").hidden = false;
+    window.scrollTo({ top: 0 });
+  }
+
+  function showWork() {
+    $("intro").hidden = true; $("send").hidden = true; $("work").hidden = false;
+    render();
+  }
+
+  $("start").addEventListener("click", () => { index = firstOpen(); showWork(); });
+  $("prev").addEventListener("click", () => { if (index > 0) { index--; render(); } });
+  $("next").addEventListener("click", () => {
+    if (index < DATA.items.length - 1) { index++; render(); }
+  });
+  $("finish").addEventListener("click", showSend);
+  $("review").addEventListener("click", () => { index = 0; showWork(); });
+  $("copy").addEventListener("click", () => {
+    const text = $("answers").value;
+    const fallback = () => {
+      $("answers").focus(); $("answers").select();
+      $("copied").textContent = "Texto seleccionado: cópialo y pégalo en WhatsApp.";
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text)
+        .then(() => { $("copied").textContent = "Copiado. Pégalo en el chat de WhatsApp."; })
+        .catch(fallback);
+    } else { fallback(); }
+  });
+  document.addEventListener("keydown", (event) => {
+    if ($("work").hidden || event.metaKey || event.ctrlKey || event.altKey) return;
+    const label = DATA.labels.find((l) => l.code === event.key.toUpperCase());
+    if (label) choose(label.code);
+    if (event.key === "ArrowLeft") $("prev").click();
+    if (event.key === "ArrowRight") $("next").click();
+  });
+
+  if (answered() > 0) $("start").textContent = "Continuar (" + answered() + " / " + DATA.items.length + ")";
+})();
+</script>

@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anotación set fresco</title>
+<style>
+  :root {
+    --bg: #f6f5f2; --surface: #ffffff; --text: #1d1d1b; --muted: #6b6a66; --border: #dedcd6;
+    --accent: #2f5bd3; --accent-soft: #e6ecfb; --ok: #2e7d4f; --discard: #9a4b2f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161614; --surface: #20201d; --text: #ecebe6; --muted: #a09e97; --border: #3a3935;
+      --accent: #7f9cf5; --accent-soft: #283152; --ok: #6cc28f; --discard: #e09a7c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 48px; }
+  header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  h1 { font-size: 18px; margin: 0; flex: 1; }
+  .badge { background: var(--accent-soft); color: var(--accent); border-radius: 999px;
+           padding: 2px 12px; font-weight: 600; font-size: 14px; }
+  button { font: inherit; color: inherit; cursor: pointer; border: 1px solid var(--border);
+           background: var(--surface); border-radius: 8px; padding: 8px 14px; }
+  button:hover { border-color: var(--accent); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .link { border: none; background: none; color: var(--accent); padding: 4px; }
+  .progress { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;
+              margin-bottom: 20px; }
+  .progress > div { height: 100%; background: var(--ok); width: 0; transition: width .2s; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+          padding: 20px; margin-bottom: 16px; }
+  .meta { color: var(--muted); font-size: 13px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .meta a { color: var(--accent); }
+  .text { font-size: 21px; line-height: 1.45; margin: 12px 0 0; overflow-wrap: anywhere; }
+  .options { display: grid; gap: 8px; }
+  .option { display: grid; grid-template-columns: 32px 1fr; gap: 4px 12px; text-align: left;
+            padding: 12px 14px; }
+  .key { grid-row: span 3; align-self: start; width: 28px; height: 28px; border-radius: 6px;
+         display: grid; place-items: center; background: var(--bg); font-weight: 700;
+         font-size: 14px; border: 1px solid var(--border); }
+  .name { font-weight: 600; }
+  .name code { font-weight: 400; color: var(--muted); font-size: 13px; margin-left: 6px; }
+  .what, .not { font-size: 13px; color: var(--muted); }
+  .not::before { content: "No incluye: "; font-weight: 600; }
+  .option.selected { border: 2px solid var(--accent); background: var(--accent-soft); }
+  .option.selected .key { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+  .option.discard .name { color: var(--discard); }
+  nav { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+  nav .spacer { flex: 1; }
+  .start { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin-top: 24px; }
+  .start button { padding: 28px 12px; font-size: 20px; font-weight: 600; }
+  .hint { color: var(--muted); font-size: 13px; }
+  .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
+           background: var(--text); color: var(--bg); padding: 8px 16px; border-radius: 8px;
+           opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+  .error { color: var(--discard); }
+  [hidden] { display: none !important; }
+  @media (max-width: 560px) { .start { grid-template-columns: 1fr; } .text { font-size: 18px; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Set fresco · anotación de tipo</h1>
+    <span class="badge" id="who" hidden></span>
+    <button class="link" id="switch" hidden>Cambiar anotador</button>
+  </header>
+
+  <section id="start">
+    <p>Elige quién anota. Cada anotador ve y guarda solo su propia columna; no se muestran las
+       etiquetas del otro anotador. Clasifica cada frase leyendo solo su texto y las definiciones.</p>
+    <div class="start">
+      <button data-annotator="a">Anotador A</button>
+      <button data-annotator="b">Anotador B</button>
+      <button data-annotator="c">Anotador C</button>
+      <button data-annotator="d">Anotador D</button>
+    </div>
+  </section>
+
+  <section id="work" hidden>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="card">
+      <div class="meta">
+        <span id="pos"></span><span id="rid"></span><span id="loc"></span>
+        <a id="src" target="_blank" rel="noopener noreferrer">ver en el documento ↗</a>
+      </div>
+      <p class="text" id="text"></p>
+    </div>
+    <div class="options" id="options"></div>
+    <nav>
+      <button id="prev">← Anterior</button>
+      <button id="next">Siguiente →</button>
+      <span class="spacer"></span>
+      <button id="pending">Primero sin anotar</button>
+    </nav>
+    <p class="hint">Teclado: <b>1–7</b> elige y guarda · <b>←/→</b> navega ·
+       <b>N</b> primero sin anotar. Puedes volver atrás y cambiar una etiqueta.</p>
+  </section>
+
+  <section id="done" hidden>
+    <div class="card">
+      <p class="text">Has anotado todas las frases. 🎉</p>
+      <p class="hint" id="done-count"></p>
+    </div>
+    <nav><button id="review">Revisar desde el principio</button></nav>
+  </section>
+
+  <p class="error" id="error" hidden></p>
+</main>
+<div class="toast" id="toast">Guardado</div>
+
+<script>
+const NAMES = {
+  functional: "Funcional", performance: "Rendimiento", security: "Seguridad",
+  usability: "Usabilidad", operational_constraint: "Restricción operativa",
+  other: "Otra calidad", discard: "Descartar (no es un requisito)",
+};
+const $ = (id) => document.getElementById(id);
+let annotator = null, labels = [], current = null, busy = false;
+
+async function api(path, options) {
+  const response = await fetch(path, options);
+  const body = await response.json();
+  if (!response.ok) throw new Error(body.error || response.statusText);
+  return body;
+}
+
+function showError(error) {
+  $("error").textContent = "Error: " + error.message;
+  $("error").hidden = false;
+}
+
+function renderOptions() {
+  const box = $("options");
+  box.replaceChildren();
+  labels.forEach((label, i) => {
+    const button = document.createElement("button");
+    button.className = "option" + (label.key === "discard" ? " discard" : "");
+    button.dataset.key = label.key;
+    const key = document.createElement("span");
+    key.className = "key"; key.textContent = String(i + 1);
+    const name = document.createElement("span");
+    name.className = "name"; name.textContent = NAMES[label.key] || label.key;
+    const code = document.createElement("code");
+    code.textContent = label.key; name.append(code);
+    const what = document.createElement("span");
+    what.className = "what"; what.textContent = label.what || "";
+    button.append(key, name, what);
+    if (label.not_for) {
+      const not = document.createElement("span");
+      not.className = "not"; not.textContent = label.not_for;
+      button.append(not);
+    }
+    button.addEventListener("click", () => save(label.key));
+    box.append(button);
+  });
+}
+
+function show(item) {
+  $("error").hidden = true;
+  $("bar").style.width = (100 * item.done / item.total) + "%";
+  if (item.complete) {
+    current = null;
+    $("work").hidden = true; $("done").hidden = false;
+    $("done-count").textContent = `${item.done} de ${item.total} anotadas.`;
+    return;
+  }
+  current = item;
+  $("done").hidden = true; $("work").hidden = false;
+  $("pos").textContent = `${item.index + 1} / ${item.total} · anotadas ${item.done}`;
+  $("rid").textContent = item.req_id;
+  $("loc").textContent = `${item.doc_id} · ${item.location}`;
+  $("src").hidden = !item.source_url;
+  if (item.source_url) $("src").href = item.source_url;
+  $("text").textContent = item.text;
+  document.querySelectorAll(".option").forEach((el) =>
+    el.classList.toggle("selected", el.dataset.key === item.label));
+  $("prev").disabled = item.index === 0;
+  $("next").disabled = item.index === item.total - 1;
+}
+
+async function load(index) {
+  const query = `annotator=${annotator}` + (index === undefined ? "" : `&index=${index}`);
+  try { show(await api(`/api/item?${query}`)); } catch (error) { showError(error); }
+}
+
+async function save(label) {
+  if (!current || busy) return;
+  busy = true;
+  try {
+    const next = await api("/api/label", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({annotator, req_id: current.req_id, label}),
+    });
+    toast(`Guardado: ${current.req_id} → ${NAMES[label]}`);
+    show(next);
+  } catch (error) { showError(error); }
+  busy = false;
+}
+
+let toastTimer;
+function toast(message) {
+  $("toast").textContent = message;
+  $("toast").classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => $("toast").classList.remove("show"), 1400);
+}
+
+function choose(who) {
+  annotator = who;
+  location.hash = who;
+  $("start").hidden = true;
+  $("who").hidden = false; $("switch").hidden = false;
+  $("who").textContent = "Anotador " + who.toUpperCase();
+  load();
+}
+
+function reset() {
+  annotator = null; current = null;
+  history.replaceState(null, "", location.pathname);
+  ["work", "done", "who", "switch"].forEach((id) => $(id).hidden = true);
+  $("start").hidden = false;
+}
+
+document.querySelectorAll("[data-annotator]").forEach((button) =>
+  button.addEventListener("click", () => choose(button.dataset.annotator)));
+$("switch").addEventListener("click", reset);
+$("prev").addEventListener("click", () => current && load(current.index - 1));
+$("next").addEventListener("click", () => current && load(current.index + 1));
+$("pending").addEventListener("click", () => load());
+$("review").addEventListener("click", () => load(0));
+
+document.addEventListener("keydown", (event) => {
+  if (!annotator || event.metaKey || event.ctrlKey || event.altKey) return;
+  const n = Number(event.key);
+  if (n >= 1 && n <= labels.length) { save(labels[n - 1].key); return; }
+  if (event.key === "ArrowLeft" && current && current.index > 0) load(current.index - 1);
+  if (event.key === "ArrowRight" && current && current.index < current.total - 1) load(current.index + 1);
+  if (event.key.toLowerCase() === "n") load();
+});
+
+api("/api/labels").then((body) => {
+  labels = body;
+  renderOptions();
+  const hash = location.hash.slice(1);
+  if (["a", "b", "c", "d"].includes(hash)) choose(hash);
+}).catch(showError);
+</script>
+</body>
+</html>
