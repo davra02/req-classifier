@@ -26,6 +26,9 @@ medido es válido. Plan completo: `docs/PLAN.md`. El usuario se comunica en espa
    170; B y C (y D de reserva) anotan una submuestra disjunta de 30 cada uno (`fresh assign` hecho;
    formularios web publicados con `fresh form`, enlaces en `data/fresh/README.md` → respuesta por
    WhatsApp `1F 2S …` → `fresh reply --who b|c --paste`).
+   B respondió el 2026-11-10: κ A–B hojas 0,20 [0,00; 0,40] (37 % de acuerdo), nivel 1 0,11
+   (n = 30): muy bajo; esperar a C antes de concluir y no tocar `annotator_a` (la adjudicación va
+   en `adjudicated`). Pendiente: C (y D si hace falta).
    Después: `fresh kappa`, adjudicar las 60 (el resto = etiqueta de A) y commit para congelarlo
    antes de evaluar nada sobre él. Puede ir en paralelo al paso 2. Limitación
    que reportar: muchos SRS de 2025–2026 estarán escritos con LLM sin declararlo.
