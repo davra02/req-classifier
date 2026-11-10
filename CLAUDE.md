@@ -43,15 +43,14 @@ medido es válido. Plan completo: `docs/PLAN.md`. El usuario se comunica en espa
    B3 − B1 = +0,103 [+0,038; +0,168]. Ninguna regla de B1 llega a precisión 0,95 (todas
    CANDIDATAS). B3 está infraconfiado (confianza media 0,48, acierto 0,67; ECE 0,22): pendiente
    de calibrar en el paso 6. Los hiperparámetros cambian entre folds (dev pequeño).
-3. **SIGUIENTE SESIÓN: Jev en dev** (decidido el 2026-11-10: va antes que B4). J1/J2 (rotaciones
-   0, 1 y 2 de `jev_type_v1`), J4 y J3 (stacking). ~1.350 llamadas, ≈ $0.12. Antes de escribir
-   código: cargar la skill de TypeSafe y leer la documentación en vivo (API/SDK y primitivas Choice
-   y Noul). Reutilizar `reqcore/clients/jev.py` (caché + presupuesto, ya probado en el smoke test)
-   y el mismo esquema que los baselines: `reqbench/eval/cv.py` (`load_dev`, `evaluate`, `save`),
-   predicciones fuera de fold en `runs/phase1/dev/` y comparación pareada con B3 (listón: macro-F1
-   0,617). Jev no se entrena: J1/J2/J4 predicen sobre cada fila de dev directamente; solo J3
-   (LR sobre las probabilidades de Jev) necesita la CV por folds. Mostrar la estimación con
-   *dry run* antes de ejecutar y esperar el visto bueno del usuario.
+3. **Jev en dev: hecho (2026-11-10)**, `uv run reqbench jev [--run]` (sin `--run` es *dry run*; con
+   todo en caché evalúa gratis). Commit `5fcc144`. `jev-1.14.0` (desviación 2), 3.059 llamadas,
+   $0.274. Resultados y hashes en `docs/reports/phase1/JEV_ITERATIONS.md` (versión 1 de 15).
+   Macro-F1 dev: J1 **0,830** · J2 0,829 · J3 0,836 · J4 0,818, frente a B3 0,617
+   (J1 − B3 = +0,214 [+0,158; +0,269]); variantes Jev entre sí no separables (J4 peor en nivel 1
+   y AURC). Estabilidad 0,7 % de cambios; orden 2,1 %; sin sesgo de primera opción medible.
+   ECE cruda 0,07–0,08 (> 0,05: hay que calibrar en el paso 6). Riesgo: contaminación de
+   PROMISE (el set fresco lo comprueba). El competidor real será Haiku (B5) y B4.
 4. **B4 DeBERTa-v3-small** en MPS (M4, fp32), 5 semillas (local, sin coste, ~30–60 min).
 5. **Haiku en dev** con k = 5 (Batch API para lo que no mide latencia); iteración de prompts solo
    sobre un subconjunto de 150 de dev; máximo 15 versiones registradas.
