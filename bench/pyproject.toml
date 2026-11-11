@@ -10,6 +10,8 @@ dependencies = [
     "scikit-learn>=1.5",
     "sentence-transformers>=3.0",
     "pyyaml>=6.0",
+    "sentencepiece>=0.2.3",
+    "protobuf>=7.36.2",
 ]
 
 [project.scripts]

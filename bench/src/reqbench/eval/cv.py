@@ -109,3 +109,36 @@ def save(name: str, oof: pd.DataFrame, params: list, summary: dict) -> Path:
         json.dumps({"system": name, "fold_params": params, **summary}, indent=2) + "\n"
     )
     return out
+
+
+def _aligned(a: pd.DataFrame, b: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    a, b = a[~a["is_example"]], b[~b["is_example"]]
+    ids = sorted(set(a["req_id"]) & set(b["req_id"]))
+    a = a.set_index("req_id").loc[ids].reset_index()
+    b = b.set_index("req_id").loc[ids].reset_index()
+    if not (a["gold"].to_numpy() == b["gold"].to_numpy()).all():
+        raise RuntimeError("gold labels differ between OOF files")
+    return a, b
+
+
+def compare(oof_a: pd.DataFrame, oof_b: pd.DataFrame, n_resamples: int) -> dict:
+    """Paired bootstrap of a - b: macro-F1, level-1 F1, accuracy, AURC (lower is better)."""
+    a, b = _aligned(oof_a, oof_b)
+    gold, n = a["gold"].to_numpy(), len(a)
+    pa, pb = a["pred"].to_numpy(), b["pred"].to_numpy()
+    out = {"n": n}
+    out["macro_f1"] = bootstrap.paired_difference(
+        lambda i: metrics.macro_f1(gold[i], pa[i], LABELS),
+        lambda i: metrics.macro_f1(gold[i], pb[i], LABELS), n, n_resamples)
+    out["level1_f1"] = bootstrap.paired_difference(
+        lambda i: metrics.level1_f1(gold[i], pa[i]),
+        lambda i: metrics.level1_f1(gold[i], pb[i]), n, n_resamples)
+    out["accuracy"] = bootstrap.paired_difference(
+        lambda i: metrics.accuracy(gold[i], pa[i]),
+        lambda i: metrics.accuracy(gold[i], pb[i]), n, n_resamples)  # fmt: skip
+    qa, qb = probabilities(a), probabilities(b)
+    if qa is not None and qb is not None:
+        out["aurc"] = bootstrap.paired_difference(
+            lambda i: metrics.aurc(gold[i], qa[i], LABELS),
+            lambda i: metrics.aurc(gold[i], qb[i], LABELS), n, n_resamples)  # fmt: skip
+    return out

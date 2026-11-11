@@ -214,6 +214,21 @@ def cmd_jev(args: argparse.Namespace) -> None:
     _print({k: report[k] for k in ("usage", "stability", "order")})
 
 
+def cmd_finetune(args: argparse.Namespace) -> None:
+    from reqbench.eval.finetune_dev import run_finetune_dev
+    from reqbench.models.finetune import SEEDS, Recipe
+
+    seeds = SEEDS[: args.n_seeds]
+    report = run_finetune_dev(seeds, Recipe(max_epochs=args.max_epochs),
+                              n_resamples=args.n_resamples)  # fmt: skip
+    _print({k: report[k] for k in ("over_seeds", "per_seed", "fit_seconds_total")})
+    for name, refs in report["comparisons"].items():
+        for ref, diff in refs.items():
+            m = diff["macro_f1"]
+            print(f"{name} - {ref}: macro-F1 {m['value']:+.3f} "
+                  f"[{m['ci95'][0]:+.3f}, {m['ci95'][1]:+.3f}]")
+
+
 def main() -> None:
     load_env()
     parser = argparse.ArgumentParser(prog="reqbench")
@@ -271,6 +286,12 @@ def main() -> None:
     jevp.add_argument("--workers", type=int, default=8)
     jevp.add_argument("--n-resamples", type=int, default=10_000)
     jevp.set_defaults(func=cmd_jev)
+
+    ft = sub.add_parser("finetune", help="phase 1: B4 DeBERTa-v3-small on dev (local, no cost)")
+    ft.add_argument("--n-seeds", type=int, default=5)
+    ft.add_argument("--max-epochs", type=int, default=15)
+    ft.add_argument("--n-resamples", type=int, default=10_000)
+    ft.set_defaults(func=cmd_finetune)
 
     args = parser.parse_args()
     args.func(args)

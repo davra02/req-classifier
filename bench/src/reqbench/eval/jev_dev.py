@@ -41,39 +41,6 @@ def _variants(answers: pd.DataFrame, rows: pd.DataFrame, rotations) -> dict:
     return out
 
 
-def _aligned(a: pd.DataFrame, b: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    a, b = a[~a["is_example"]], b[~b["is_example"]]
-    ids = sorted(set(a["req_id"]) & set(b["req_id"]))
-    a = a.set_index("req_id").loc[ids].reset_index()
-    b = b.set_index("req_id").loc[ids].reset_index()
-    if not (a["gold"].to_numpy() == b["gold"].to_numpy()).all():
-        raise RuntimeError("gold labels differ between OOF files")
-    return a, b
-
-
-def compare(oof_a: pd.DataFrame, oof_b: pd.DataFrame, n_resamples: int) -> dict:
-    """Paired bootstrap of a - b: macro-F1, level-1 F1, accuracy, AURC (lower is better)."""
-    a, b = _aligned(oof_a, oof_b)
-    gold, n = a["gold"].to_numpy(), len(a)
-    pa, pb = a["pred"].to_numpy(), b["pred"].to_numpy()
-    out = {"n": n}
-    out["macro_f1"] = bootstrap.paired_difference(
-        lambda i: metrics.macro_f1(gold[i], pa[i], LABELS),
-        lambda i: metrics.macro_f1(gold[i], pb[i], LABELS), n, n_resamples)
-    out["level1_f1"] = bootstrap.paired_difference(
-        lambda i: metrics.level1_f1(gold[i], pa[i]),
-        lambda i: metrics.level1_f1(gold[i], pb[i]), n, n_resamples)
-    out["accuracy"] = bootstrap.paired_difference(
-        lambda i: metrics.accuracy(gold[i], pa[i]),
-        lambda i: metrics.accuracy(gold[i], pb[i]), n, n_resamples)  # fmt: skip
-    qa, qb = cv.probabilities(a), cv.probabilities(b)
-    if qa is not None and qb is not None:
-        out["aurc"] = bootstrap.paired_difference(
-            lambda i: metrics.aurc(gold[i], qa[i], LABELS),
-            lambda i: metrics.aurc(gold[i], qb[i], LABELS), n, n_resamples)  # fmt: skip
-    return out
-
-
 def run_jev_dev(run: bool = False, rotations=jev.ROTATIONS, n_samples: int = jev.N_SAMPLES,
                 workers: int = 8, n_resamples: int = bootstrap.N_RESAMPLES) -> dict:  # fmt: skip
     dev = cv.load_dev()
@@ -102,7 +69,7 @@ def run_jev_dev(run: bool = False, rotations=jev.ROTATIONS, n_samples: int = jev
         if (out_dir / f"oof_{ref}.csv").exists()
     }
     comparisons = {
-        name: {ref: compare(oof, ref_oof, n_resamples) for ref, ref_oof in references.items()}
+        name: {ref: cv.compare(oof, ref_oof, n_resamples) for ref, ref_oof in references.items()}
         for name, (oof, _) in systems.items()
     }
     preregistered = [n for n in systems if not n.startswith("J4x")]

@@ -51,13 +51,21 @@ medido es válido. Plan completo: `docs/PLAN.md`. El usuario se comunica en espa
    y AURC). Estabilidad 0,7 % de cambios; orden 2,1 %; sin sesgo de primera opción medible.
    ECE cruda 0,07–0,08 (> 0,05: hay que calibrar en el paso 6). Riesgo: contaminación de
    PROMISE (el set fresco lo comprueba). El competidor real será Haiku (B5) y B4.
-4. **B4 DeBERTa-v3-small** en MPS (M4, fp32), 5 semillas (local, sin coste, ~30–60 min).
+4. **B4 DeBERTa-v3-small: hecho (2026-11-11)**, `uv run reqbench finetune` (local, ~66 min, $0).
+   Revisión `a36c7390…` (MIT), MPS, **fp32 forzado** (transformers 5 carga en fp16 por defecto
+   y así no aprende: el código ahora aborta si no es fp32). Receta fija (lr 3e-5, batch 16,
+   ≤ 15 épocas, CE sin pesos); solo se eligen las épocas con un fold interno de validación.
+   Macro-F1 dev, 5 semillas: **0,687 ± 0,017** [0,673–0,716]; nivel 1 0,814 ± 0,055 (inestable:
+   0,73–0,87). Frente a J1: entre −0,114 y −0,158 (todas con IC < 0); frente a B3: +0,056 a
+   +0,100. ECE 0,18, cobertura al 95 % 0,08. Ensemble de semillas (exploratorio) 0,720.
+   Limitación: el tope de 15 épocas se alcanzó en 3 de 25 entrenamientos.
 5. **Haiku en dev** con k = 5 (Batch API para lo que no mide latencia); iteración de prompts solo
    sobre un subconjunto de 150 de dev; máximo 15 versiones registradas.
 6. Calibración, umbrales, congelación, **test una sola vez** (+ fresco) e informe
    `docs/reports/phase1/REPORT.md`.
 - Comandos: `uv run reqbench data all|download|build|split|examples` · `uv run reqbench budget` ·
-  `uv run reqbench smoke [--run]` · `uv run reqbench fresh collect [--write] [--refresh]|annotate|assign|form|message|reply|kappa` · `uv run reqbench baselines [--systems b0 b1 b2 b3]` · `uv run --group dev pytest -q` · `uv run --group dev ruff check packages bench`. **La fase 1 (MVP) es SOLO el benchmark de tipo sobre PROMISE, con su
+  `uv run reqbench smoke [--run]` · `uv run reqbench fresh collect [--write] [--refresh]|annotate|assign|form|message|reply|kappa` · `uv run reqbench baselines [--systems b0 b1 b2 b3]` · `uv run reqbench jev [--run]` ·
+  `uv run reqbench finetune [--n-seeds 5]` · `uv run --group dev pytest -q` · `uv run --group dev ruff check packages bench`. **La fase 1 (MVP) es SOLO el benchmark de tipo sobre PROMISE, con su
   informe. Nada de servicio ni interfaz hasta tener la decisión de la fase 1.**
 - El usuario acepta el presupuesto de créditos de API (≤ $10).
 - **Credenciales en `.env.local`** (nunca imprimir sus valores; cargar con `set -a; . ./.env.local; set +a`;

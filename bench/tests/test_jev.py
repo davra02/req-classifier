@@ -139,3 +139,32 @@ def test_paired_difference_p_value_and_holm():
     adjusted = bootstrap.holm({"a": 0.01, "b": 0.04, "c": 0.03})
     assert adjusted == {"a": pytest.approx(0.03), "c": pytest.approx(0.06),
                         "b": pytest.approx(0.06)}  # fmt: skip
+
+
+def test_finetune_epoch_selection_uses_inner_fold_only(monkeypatch):
+    from reqbench.models.finetune import DebertaClassifier
+
+    seen = []
+
+    def fake_train(self, texts, labels, epochs, val_texts=None, val_labels=None):
+        seen.append((list(texts), epochs, val_texts))
+        return "model", ([0.2, 0.5, 0.5, 0.4] if val_texts is not None else [])
+
+    monkeypatch.setattr(DebertaClassifier, "_train", fake_train)
+    model = DebertaClassifier(seed=1).fit(["a", "b", "c", "d"], ["functional"] * 4, [3, 1, 1, 4])
+    inner, refit = seen
+    assert inner[2] == ["b", "c"] and inner[0] == ["a", "d"]  # fold 1 is the inner val set
+    assert model.params_["epochs"] == 2  # tie between epochs 2 and 3 -> fewer epochs
+    assert refit[0] == ["a", "b", "c", "d"] and refit[1] == 2 and refit[2] is None
+
+
+def test_seed_ensemble_averages_probabilities():
+    from reqbench.eval.finetune_dev import _ensemble
+
+    def oof(p_func):
+        row = {"req_id": "x", "project_id": 1, "fold": 0, "gold": "functional",
+               "is_example": False, "pred": "?"}
+        return pd.DataFrame([row | {f"p_{k}": 0.0 for k in LABELS} | {"p_functional": p_func,
+                                                                       "p_other": 1 - p_func}])
+    out = _ensemble([oof(0.2), oof(0.8), oof(0.8)])
+    assert out.loc[0, "p_functional"] == pytest.approx(0.6) and out.loc[0, "pred"] == "functional"
