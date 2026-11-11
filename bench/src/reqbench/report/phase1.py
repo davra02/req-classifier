@@ -17,9 +17,10 @@ from reqbench.models.baselines import LABELS
 
 SURFACE, INK, MUTED, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#e4e3df"
 SLOTS = ("#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300")
-RELIABILITY = ("J1_jev_choice", "J4_jev_hierarchical", "B5_haiku_k5", "B4_deberta_v3_small_s1")
-RISK = ("J1_jev_choice_cal", "J4_jev_hierarchical_cal", "B5_haiku_k5_cal",
-        "B4_deberta_v3_small_s1_cal", "B3_bge_small_lr_cal")  # fmt: skip
+RELIABILITY = ("J3_jev_lr", "J1_jev_choice", "J4_jev_hierarchical", "B5_haiku_k5",
+               "B4_deberta_v3_small_s1")  # fmt: skip
+RISK = ("J3_jev_lr_cal", "J1_jev_choice_cal", "B5_haiku_k5_cal", "B4_deberta_v3_small_s1_cal",
+        "B3_bge_small_lr_cal")  # fmt: skip
 NAMES = {
     "B0_majority": "B0 majority", "B1_keywords": "B1 keywords", "B2_tfidf_lr": "B2 TF-IDF+LR",
     "B3_bge_small_lr": "B3 bge-small+LR", "B5_haiku_k5": "B5 Haiku 5.5 (k=5)",
@@ -110,6 +111,7 @@ def risk_coverage_figure(frames: dict[str, pd.DataFrame], thresholds: dict, out:
     ax.axhline(1 - metrics.TARGET_PRECISION, color=MUTED, linewidth=1, linestyle=(0, (3, 3)))
     ax.text(0.01, 1 - metrics.TARGET_PRECISION + 0.005, "5 % error (95 % precision)",
             fontsize=7, color=MUTED)  # fmt: skip
+    ends: list[float] = []
     for color, system in zip(SLOTS, [s for s in RISK if s in frames], strict=False):
         f = frames[system]
         probs = cv.probabilities(f)
@@ -118,8 +120,12 @@ def risk_coverage_figure(frames: dict[str, pd.DataFrame], thresholds: dict, out:
         aurc = float(risk.mean())
         ax.plot(coverage, risk, color=color, linewidth=2,
                 label=f"{name(system)} (AURC {aurc:.3f})")  # fmt: skip
-        ax.annotate(name(system).split(" ")[0], (1.0, risk[-1]), xytext=(4, 0),
-                    textcoords="offset points", fontsize=7, color=INK, va="center")  # fmt: skip
+        y = float(risk[-1])
+        while any(abs(y - e) < 0.012 for e in ends):  # nudge end labels apart
+            y += 0.012
+        ends.append(y)
+        ax.annotate(name(system).split(" ")[0], (1.0, risk[-1]), xytext=(1.012, y),
+                    textcoords="data", fontsize=7, color=INK, va="center")  # fmt: skip
     ax.set_xlim(0, 1.08)
     ax.set_ylim(0, None)
     ax.set_xlabel("coverage (share decided automatically, most confident first)",

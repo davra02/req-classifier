@@ -77,15 +77,21 @@ medido es válido. Plan completo: `docs/PLAN.md`. El usuario se comunica en espa
    **Corrección de métrica (2026-11-11):** AURC y cobertura trataban los empates de confianza
    por el orden de entrada; ahora un bloque empatado es indivisible. Cambian algo J1/J2/J4
    (J1 AURC 0,049, cobertura 0,641); B2–B4 no cambian.
-6. **Calibración, umbrales y congelación: hechos (2026-11-11).** `uv run reqbench calibrate`
-   (CV anidada por proyecto; gana vector scaling en J1/J2/B5, Platt+vector en J4, temperatura
-   en J3; identidad nunca), `reqbench final` (B0–B4 y J3 entrenados en todo dev, hashes en
-   `frozen/phase1/final_models.json`), `reqbench freeze` → `frozen/phase1/FREEZE.json`
-   (hash `1ff9e151…`, explicado en `docs/reports/phase1/FREEZE.md`; desviación 3 del
-   prerregistro: test antes que fresco, suite adversarial, Opus `max_tokens` 1024, lectura
-   operativa de la regla). Siguiente: `reqbench heldout test` (dry run ≈ $0,81; `--run` paga,
-   registra en `EVAL_LOG.jsonl` y evalúa una vez), informe `REPORT.md`
-   (`reqbench reproduce [--from-cache]`). El fresco, con la MISMA congelación.
+6. **Calibración, umbrales y congelación: hechos (2026-11-11).** `reqbench calibrate`
+   (CV anidada por proyecto; identidad nunca gana), `reqbench final` (B0–B4 y J3 en todo dev),
+   `reqbench freeze` → `frozen/phase1/FREEZE.json` (hash `1ff9e151…`, `docs/reports/phase1/FREEZE.md`;
+   desviación 3: test antes que fresco, suite adversarial, Opus `max_tokens` 1024, lectura
+   operativa de la regla). **Test evaluado UNA vez (2026-11-11, `EVAL_LOG.jsonl`, $0,82):**
+   veredicto **NO CONCLUYENTE**. Mejor Jev = J3 0,796 vs B* = B5 Haiku 0,781 (Δ +0,015
+   [−0,026; +0,054]: no inferior); 2(a) y 2(b) sí (AURC 0,052 vs 0,179); falla el criterio 3:
+   ECE calibrada de J3 0,114 > 0,05 y adversarial 5 % vs 1,7 % de B5. J1 solo no sería no
+   inferior (−0,008 [−0,057; +0,042]). Opus (techo) 0,857. Informe
+   `docs/reports/phase1/REPORT.md` (+ `TEST_TABLES.md`, figuras). **Desempate decidido por el
+   usuario: J3** (`docs/decisions/0001-phase1-type-decision.md`; no es un GO: condiciones =
+   umbral más conservador o recalibración, detector de inyección obligatorio, reabrir si el
+   fresco sale mal). Pendiente: set fresco con la MISMA congelación
+   (`heldout fresh --run`, tras adjudicar y hacer commit), LOPO, Dalpiaz, sonda de contaminación.
+   **No tocar los ficheros congelados** (rompería la reproducción del test).
 - Comandos: `uv run reqbench data all|download|build|split|examples` · `uv run reqbench budget` ·
   `uv run reqbench smoke [--run]` · `uv run reqbench fresh collect [--write] [--refresh]|annotate|assign|form|message|reply|kappa` · `uv run reqbench baselines [--systems b0 b1 b2 b3]` · `uv run reqbench jev [--run]` ·
   `uv run reqbench finetune [--n-seeds 5]` · `uv run reqbench haiku [--run]` ·
