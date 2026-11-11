@@ -92,6 +92,12 @@ medido es válido. Plan completo: `docs/PLAN.md`. El usuario se comunica en espa
    fresco sale mal). Pendiente: set fresco con la MISMA congelación
    (`heldout fresh --run`, tras adjudicar y hacer commit), LOPO, Dalpiaz, sonda de contaminación.
    **No tocar los ficheros congelados** (rompería la reproducción del test).
+   **Auditoría independiente (2026-11-11): `docs/reports/phase1/AUDIT.md`** (`reqbench audit`,
+   sin coste). Clave: C1 = calibrador/umbral de J3 ajustados sobre modelos de fold con C 0,1–1 y
+   aplicados al final con C = 30 (también B2–B4); C2 = el desempate ignoró a Haiku de una
+   llamada (B5x 0,788, $0,13/1.000; J3 − B5x +0,008 [−0,032; +0,045]) → ADR 0001 se sustituye
+   por un ADR 0002 (decisión del usuario pendiente). REPORT.md con erratas E1–E8. Arreglos de
+   código congelado aplazados hasta después del set fresco (lista en AUDIT.md).
 - Comandos: `uv run reqbench data all|download|build|split|examples` · `uv run reqbench budget` ·
   `uv run reqbench smoke [--run]` · `uv run reqbench fresh collect [--write] [--refresh]|annotate|assign|form|message|reply|kappa` · `uv run reqbench baselines [--systems b0 b1 b2 b3]` · `uv run reqbench jev [--run]` ·
   `uv run reqbench finetune [--n-seeds 5]` · `uv run reqbench haiku [--run]` ·

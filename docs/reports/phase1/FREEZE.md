@@ -56,3 +56,22 @@ Checked before freezing: 75 tests pass; the whole held-out pipeline (`heldout.ev
 run end to end on dev rows from the cache, without API keys (B6 stubbed with Haiku, no
 adversarial suite), to make sure it cannot crash after the paid test calls. No test text
 reached any system and no test label was read.
+
+## Errata (added 2026-11-11, after the locked-test evaluation and an independent audit)
+
+The text above is kept as written at the freeze. Two statements in it are inaccurate (details
+in `AUDIT.md`):
+
+- **Calibrators and thresholds of trained systems do not match the evaluated models (AUDIT
+  C1).** They were fitted on out-of-fold predictions of models whose hyperparameters were
+  tuned per fold (J3: C = 0.1–1; B2, B3: C varies; B4: epochs vary), and frozen for final
+  models retrained on all of dev with other hyperparameters (J3: C = 30). For J3 this makes
+  the frozen temperature (T = 0.72) and threshold (0.954) wrong for the final model: on dev,
+  with C = 30 out of fold, ECE 0.052 → 0.077 with T and the threshold decides 75 % at precision
+  0.92, not 33 % at 0.95 as in the table above. The figures in the table are correct for the
+  per-fold models they were computed on.
+- **"Identity never won"** refers to the final selection only; for B3 identity won in 4 of 5
+  outer folds.
+
+Nothing frozen was changed: the fresh set will be evaluated with this same freeze, and the
+fix (calibrating predictions of the model that is evaluated) is deferred to the next freeze.

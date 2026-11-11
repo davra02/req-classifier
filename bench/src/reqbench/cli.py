@@ -350,6 +350,13 @@ def cmd_reproduce(args: argparse.Namespace) -> None:
     print(f"Report: {phase1.write_report()}")
 
 
+def cmd_audit(args: argparse.Namespace) -> None:
+    from reqbench.eval.audit_phase1 import audit_dir, run_audit
+
+    _print(run_audit(n_resamples=args.n_resamples))
+    print(f"Written to {audit_dir() / 'audit.json'}")
+
+
 def main() -> None:
     load_env()
     parser = argparse.ArgumentParser(prog="reqbench")
@@ -448,6 +455,11 @@ def main() -> None:
     rep.add_argument("--from-cache", action="store_true", help="never call an API")
     rep.add_argument("--n-resamples", type=int, default=10_000)
     rep.set_defaults(func=cmd_reproduce)
+
+    aud = sub.add_parser("audit", help="phase-1 audit support analyses (no cost; some are "
+                         "post hoc on test predictions)")  # fmt: skip
+    aud.add_argument("--n-resamples", type=int, default=10_000)
+    aud.set_defaults(func=cmd_audit)
 
     args = parser.parse_args()
     args.func(args)
