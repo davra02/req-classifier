@@ -55,8 +55,9 @@ nor questions were iterated (version 1 of 15 for both).
 | NO-GO conditions (below B\* beyond δ; below B2; instability) | none holds | — |
 
 **Verdict: INCONCLUSIVE.** The preregistration says that then "the simpler, cheaper system
-wins", without defining *simpler*. ADR 0001 applied the tie-break in favour of J3; it is being
-superseded by ADR 0002 because it overlooked B5x (E2). The verdict itself stays
+wins", without defining *simpler*. ADR 0001 applied the tie-break in favour of J3; it was
+superseded by **ADR 0002, which carries forward B5x (Haiku, one call)**, following the
+literal tie-break, because ADR 0001 overlooked B5x (E2). The verdict itself stays
 "inconclusive" under any reasonable reading of the rule.
 
 Caveats on the decision itself:
@@ -222,8 +223,8 @@ ADR 0001 chose J3 as "the cheapest of the non-inferior options"; that does not h
 is considered (E2). J3 vs B5x: same accuracy (+0.008 [−0.032, +0.045], post hoc), B5x about
 2–4× cheaper and simpler (one prompt, no trained component), J3 about 4× faster and the only
 one of the two with a usable confidence for automatic decisions (B5x gives a single label).
-ADR 0002 will record the owner's decision and say whether it departs from the literal
-tie-break.
+**ADR 0002 (2026-11-11) carries forward B5x**, following the literal tie-break; J3's selective
+prediction and lower latency are given up (`docs/decisions/0002-phase1-type-decision-b5x.md`).
 
 ## Limitations
 

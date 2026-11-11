@@ -86,17 +86,15 @@ medido es válido. Plan completo: `docs/PLAN.md`. El usuario se comunica en espa
    [−0,026; +0,054]: no inferior); 2(a) y 2(b) sí (AURC 0,052 vs 0,179); falla el criterio 3:
    ECE calibrada de J3 0,114 > 0,05 y adversarial 5 % vs 1,7 % de B5. J1 solo no sería no
    inferior (−0,008 [−0,057; +0,042]). Opus (techo) 0,857. Informe
-   `docs/reports/phase1/REPORT.md` (+ `TEST_TABLES.md`, figuras). **Desempate decidido por el
-   usuario: J3** (`docs/decisions/0001-phase1-type-decision.md`; no es un GO: condiciones =
-   umbral más conservador o recalibración, detector de inyección obligatorio, reabrir si el
-   fresco sale mal). Pendiente: set fresco con la MISMA congelación
+   `docs/reports/phase1/REPORT.md` (+ `TEST_TABLES.md`, figuras). Desempate: ADR 0001 (J3) quedó
+   sustituido por el ADR 0002 (B5x), ver abajo. Pendiente: set fresco con la MISMA congelación
    (`heldout fresh --run`, tras adjudicar y hacer commit), LOPO, Dalpiaz, sonda de contaminación.
    **No tocar los ficheros congelados** (rompería la reproducción del test).
    **Auditoría independiente (2026-11-11): `docs/reports/phase1/AUDIT.md`** (`reqbench audit`,
    sin coste). Clave: C1 = calibrador/umbral de J3 ajustados sobre modelos de fold con C 0,1–1 y
    aplicados al final con C = 30 (también B2–B4); C2 = el desempate ignoró a Haiku de una
-   llamada (B5x 0,788, $0,13/1.000; J3 − B5x +0,008 [−0,032; +0,045]) → ADR 0001 se sustituye
-   por un ADR 0002 (decisión del usuario pendiente). REPORT.md con erratas E1–E8. Arreglos de
+   llamada (B5x 0,788, $0,13/1.000; J3 − B5x +0,008 [−0,032; +0,045]) → **ADR 0002: el usuario
+   eligió B5x (Haiku, una llamada)**, siguiendo el desempate literal; ADR 0001 sustituido. REPORT.md con erratas E1–E8. Arreglos de
    código congelado aplazados hasta después del set fresco (lista en AUDIT.md).
 - Comandos: `uv run reqbench data all|download|build|split|examples` · `uv run reqbench budget` ·
   `uv run reqbench smoke [--run]` · `uv run reqbench fresh collect [--write] [--refresh]|annotate|assign|form|message|reply|kappa` · `uv run reqbench baselines [--systems b0 b1 b2 b3]` · `uv run reqbench jev [--run]` ·

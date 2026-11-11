@@ -1,6 +1,8 @@
 # ADR 0001: Phase 1 decision for requirement-type classification
 
-- **Status:** accepted (2026-11-11), subject to the fresh-set check below.
+- **Status:** **superseded** by `0002-phase1-type-decision-b5x.md` (2026-11-11). It
+  overlooked Claude Haiku with one call (B5x), which is as accurate and cheaper
+  (`docs/reports/phase1/AUDIT.md`, finding C2). Originally accepted on 2026-11-11.
 - **Decided by:** the project owner, after the one-time locked-test evaluation.
 - **Evidence:** `docs/reports/phase1/REPORT.md`, `TEST_TABLES.md`, `EVAL_LOG.jsonl`
   (freeze `1ff9e151…`, commit `f9db031`).
