@@ -125,11 +125,17 @@ class LlmPrompt:
         }
 
 
-def render_llm_prompt(name: str = "llm_type_v1", examples: str | None = None) -> LlmPrompt:
+def render_llm_prompt(
+    name: str = "llm_type_v1", examples: str | None = None, rotation: int = 0
+) -> LlmPrompt:
+    """Render the LLM prompt. `rotation` cyclically shifts the order of the type definitions
+    and of the enum in the output schema, as `render_jev_questions` does for Jev's options.
+    Rotation 0 is the taxonomy order (same text and hash as before rotations existed)."""
     spec = load_yaml(name)
     taxonomy = load_taxonomy(spec["taxonomy"], examples)
+    leaves = tuple(_rotate(list(taxonomy.leaves), rotation))
     blocks = []
-    for leaf in taxonomy.leaves:
+    for leaf in leaves:
         criterion = taxonomy.criterion(leaf)
         lines = [f"- {leaf}: {criterion['what']}"]
         if "not_for" in criterion:
@@ -138,11 +144,12 @@ def render_llm_prompt(name: str = "llm_type_v1", examples: str | None = None) ->
             lines.append(f'  Example: "{example}"')
         blocks.append("\n".join(lines))
     system = spec["system"].replace("{definitions}", "\n".join(blocks))
-    payload = {"system": system, "user": spec["user"], "labels": list(taxonomy.leaves)}
+    # `labels` is a list, so its (rotated) order is part of the hash.
+    payload = {"system": system, "user": spec["user"], "labels": list(leaves)}
     return LlmPrompt(
-        version=f"{spec['version']}+{examples or 'noex'}",
+        version=f"{spec['version']}+{examples or 'noex'}+r{rotation}",
         system=system,
         user_template=spec["user"],
-        labels=taxonomy.leaves,
+        labels=leaves,
         hash=content_hash(payload),
     )

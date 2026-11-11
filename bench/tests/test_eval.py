@@ -51,6 +51,21 @@ def test_selective_metrics_rank_by_confidence():
     assert metrics.coverage_at_precision(gold, probs, LABELS, target=0.75) == 1.0
 
 
+def test_selective_metrics_do_not_depend_on_order_of_ties():
+    # three rows tied at 0.9 (one wrong), then one at 0.5 (wrong)
+    gold = ["functional", "security", "functional", "other"]
+    probs = _probs([("functional", 0.9), ("functional", 0.9), ("functional", 0.9),
+                    ("functional", 0.5)])  # fmt: skip
+    risk = metrics.risk_coverage(gold, probs, LABELS)
+    assert risk.tolist() == pytest.approx([1 / 3, 1 / 3, 1 / 3, 0.5])
+    for perm in ([1, 0, 2, 3], [2, 1, 0, 3], [3, 1, 2, 0]):
+        g, p = [gold[i] for i in perm], probs[perm]
+        assert metrics.aurc(g, p, LABELS) == pytest.approx(metrics.aurc(gold, probs, LABELS))
+        # a threshold can keep all three tied rows (precision 2/3) or none
+        assert metrics.coverage_at_precision(g, p, LABELS, target=0.6) == 0.75
+        assert metrics.coverage_at_precision(g, p, LABELS, target=0.7) == 0.0
+
+
 def test_bootstrap_is_deterministic_and_paired():
     values = np.array([1.0, 0.0, 1.0, 1.0, 0.0, 1.0])
     first = bootstrap.ci(lambda i: values[i].mean(), len(values), n_resamples=500)

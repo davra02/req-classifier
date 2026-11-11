@@ -19,20 +19,26 @@ regenerated from the inference cache with `uv run reqbench jev`.
 |---|---|---|---|---|---|---|
 | B2 TF-IDF + LR | 0.577 [0.522, 0.627] | 0.695 | 0.641 | 0.097 | 0.256 | 0.062 |
 | B3 bge-small + LR | 0.617 [0.565, 0.665] | 0.807 | 0.636 | 0.218 | 0.246 | 0.011 |
-| J1 Choice | 0.830 [0.787, 0.867] | 0.900 | 0.837 | 0.078 | 0.043 | 0.652 |
-| J2 rotation average | 0.829 [0.786, 0.865] | 0.891 | 0.844 | 0.066 | 0.045 | 0.666 |
+| J1 Choice | 0.830 [0.787, 0.867] | 0.900 | 0.837 | 0.078 | 0.049 | 0.641 |
+| J2 rotation average | 0.829 [0.786, 0.865] | 0.891 | 0.844 | 0.066 | 0.051 | 0.654 |
 | J3 LR on Jev outputs | 0.836 [0.794, 0.872] | 0.886 | 0.852 | 0.109 | 0.083 | 0.414 |
-| J4 hierarchical | 0.818 [0.775, 0.855] | 0.858 | 0.818 | 0.069 | 0.080 | 0.291 |
-| J4x hierarchical, rot. avg (exploratory) | 0.815 [0.772, 0.853] | 0.856 | — | 0.067 | 0.081 | 0.288 |
+| J4 hierarchical | 0.818 [0.775, 0.855] | 0.858 | 0.818 | 0.069 | 0.088 | 0.238 |
+| J4x hierarchical, rot. avg (exploratory) | 0.815 [0.772, 0.853] | 0.856 | — | 0.067 | 0.086 | 0.268 |
 
 - Paired differences in macro-F1 vs B3: J1 +0.214 [+0.158, +0.269]; J2 +0.212; J3 +0.219;
   J4 +0.201; Holm-adjusted p < 0.001 for all four (no resample at or below 0).
 - Among Jev variants (vs J1): J2 −0.001 [−0.015, +0.012]; J3 +0.006 [−0.015, +0.029];
-  J4 −0.013 [−0.040, +0.016], with worse level-1 F1 (−0.042) and AURC (+0.037).
+  J4 −0.013 [−0.040, +0.016], with worse level-1 F1 (−0.042) and AURC (+0.039).
 - Stability (5 samples of rotation 0): J1 label changes in 0.69 % of repeats vs sample 0
   (0.9 % of requirements change at least once); J4 0.97 %; mean SD of `is_functional` 0.008.
 - Option order (3 rotations): `req_type` label changes in 2.1 % of rotation pairs (3.0 % of
   requirements); first-position lift ≈ 0 (−0.001 to +0.001) for the three leading options.
 - Raw log loss is inflated by probabilities rounded to two decimals (exact zeros): J1 1.156.
+- **Correction (2026-11-11):** AURC and coverage at 95 % were recomputed after a fix in
+  `reqbench.eval.metrics`: tied confidences used to be ranked by input order, so a coverage
+  could stop inside a block of ties that no threshold can split. Ties are now one block
+  (expected risk inside it; coverage only at block ends). Jev's probabilities are rounded to
+  two decimals, so J1, J2 and J4 changed slightly (J1 AURC 0.043 → 0.049, coverage 0.652 →
+  0.641); macro-F1, F1 and ECE are unchanged, and so are B2-B4 (no ties).
 - Caveat: PROMISE is public since 2007 and may be in Jev's training data; the fresh set is
   the check for that (criterion 2c).

@@ -214,6 +214,39 @@ def cmd_jev(args: argparse.Namespace) -> None:
     _print({k: report[k] for k in ("usage", "stability", "order")})
 
 
+def cmd_haiku(args: argparse.Namespace) -> None:
+    from reqbench.eval.haiku_dev import MAIN, run_haiku_dev
+
+    report = run_haiku_dev(run=args.run, latency_n=args.latency_n,
+                           poll_seconds=args.poll_seconds,
+                           n_resamples=args.n_resamples)  # fmt: skip
+    if "dry_run" in report:
+        _print(report["dry_run"])
+        print("Dry run: no API call made. Re-run with --run to make the calls above.")
+        return
+    rows = []
+    for name, summary in report["summaries"].items():
+        ci = summary["ci"]
+
+        def fmt(metric: str, ci: dict = ci) -> str:
+            if metric not in ci:
+                return "—"
+            v, (lo, hi) = ci[metric]["value"], ci[metric]["ci95"]
+            return f"{v:.3f} [{lo:.3f}, {hi:.3f}]"
+
+        rows.append({"system": name, "macro_f1": fmt("macro_f1"), "level1_f1": fmt("level1_f1"),
+                     "ece": fmt("ece"), "aurc": fmt("aurc"),
+                     "cov@95": fmt("coverage_at_95")})  # fmt: skip
+    import pandas as pd
+
+    print(pd.DataFrame(rows).to_string(index=False))
+    for ref, diff in report["comparisons"][MAIN].items():
+        m = diff["macro_f1"]
+        print(f"{MAIN} - {ref}: macro-F1 {m['value']:+.3f} "
+              f"[{m['ci95'][0]:+.3f}, {m['ci95'][1]:+.3f}] (Holm p {m.get('p_holm', 1):.4f})")
+    _print({k: report[k] for k in ("usage", "stability", "order")})
+
+
 def cmd_finetune(args: argparse.Namespace) -> None:
     from reqbench.eval.finetune_dev import run_finetune_dev
     from reqbench.models.finetune import SEEDS, Recipe
@@ -286,6 +319,13 @@ def main() -> None:
     jevp.add_argument("--workers", type=int, default=8)
     jevp.add_argument("--n-resamples", type=int, default=10_000)
     jevp.set_defaults(func=cmd_jev)
+
+    hk = sub.add_parser("haiku", help="phase 1: B5 Claude Haiku 5.5 on dev (dry run unless --run)")
+    hk.add_argument("--run", action="store_true", help="make real (paid) API calls")
+    hk.add_argument("--latency-n", type=int, default=30, help="requirements for latency")
+    hk.add_argument("--poll-seconds", type=float, default=30.0)
+    hk.add_argument("--n-resamples", type=int, default=10_000)
+    hk.set_defaults(func=cmd_haiku)
 
     ft = sub.add_parser("finetune", help="phase 1: B4 DeBERTa-v3-small on dev (local, no cost)")
     ft.add_argument("--n-seeds", type=int, default=5)

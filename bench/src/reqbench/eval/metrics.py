@@ -7,7 +7,10 @@ Conventions:
   miss for the gold class).
 - ECE uses equal-mass bins (15 by default); top-label ECE bins the max probability, class-wise
   ECE bins each class's one-vs-rest probability.
-- Selective prediction ranks by the max probability (ties keep the input order).
+- Selective prediction ranks by the max probability. Tied confidences form one block that a
+  threshold cannot split: the risk inside it is the expectation over random orders, and the
+  coverage at a target precision can only stop at the end of a block. (Until 2026-11-11 ties
+  kept the input order, which mattered for Jev's 2-decimal and B5's k = 5 probabilities.)
 """
 
 from collections.abc import Sequence
@@ -119,12 +122,33 @@ def ece_per_class(gold: Sequence[str], probs: np.ndarray, labels: Sequence[str],
 # ----- selective prediction ------------------------------------------------------------------
 
 
-def risk_coverage(gold: Sequence[str], probs: np.ndarray, labels: Sequence[str]) -> np.ndarray:
-    """Risk (error rate) of the k most confident predictions, for k = 1..n."""
+def _ranked(gold: Sequence[str], probs: np.ndarray, labels: Sequence[str]):
+    """Errors sorted by decreasing confidence, and the end index of each block of tied
+    confidences (rounded to 12 decimals, so float noise from averaging does not split one)."""
     correct = probs.argmax(axis=1) == _codes(gold, labels)
-    order = np.argsort(-probs.max(axis=1), kind="stable")
-    errors = np.cumsum(~correct[order])
-    return errors / np.arange(1, len(order) + 1)
+    confidence = np.round(probs.max(axis=1), 12)
+    order = np.argsort(-confidence, kind="stable")
+    sorted_conf = confidence[order]
+    ends = np.append(np.nonzero(np.diff(sorted_conf))[0] + 1, len(order))
+    return (~correct[order]).astype(float), ends
+
+
+def risk_coverage(gold: Sequence[str], probs: np.ndarray, labels: Sequence[str]) -> np.ndarray:
+    """Risk (error rate) of the k most confident predictions, for k = 1..n.
+
+    Inside a block of tied confidences no threshold can separate the rows, so the cumulative
+    errors are the expectation over random orders of the block (linear within it). This makes
+    the curve independent of the input order, which otherwise decides the ties.
+    """
+    errors, ends = _ranked(gold, probs, labels)
+    cum = np.cumsum(errors)
+    expected = np.empty_like(cum)
+    start, before = 0, 0.0
+    for end in ends:
+        size, block = end - start, cum[end - 1] - before
+        expected[start:end] = before + block * np.arange(1, size + 1) / size
+        start, before = end, cum[end - 1]
+    return expected / np.arange(1, len(errors) + 1)
 
 
 def aurc(gold: Sequence[str], probs: np.ndarray, labels: Sequence[str]) -> float:
@@ -133,10 +157,12 @@ def aurc(gold: Sequence[str], probs: np.ndarray, labels: Sequence[str]) -> float
 
 def coverage_at_precision(gold: Sequence[str], probs: np.ndarray, labels: Sequence[str],
                           target: float = TARGET_PRECISION) -> float:  # fmt: skip
-    """Largest share of rows that can be decided automatically keeping accuracy >= target."""
-    risk = risk_coverage(gold, probs, labels)
-    ok = np.nonzero(1 - risk >= target)[0]
-    return float((ok.max() + 1) / len(risk)) if len(ok) else 0.0
+    """Largest share of rows decided automatically by a confidence threshold while keeping
+    accuracy >= target. Only block ends of tied confidences are reachable by a threshold."""
+    errors, ends = _ranked(gold, probs, labels)
+    cum = np.cumsum(errors)
+    ok = [end for end in ends if 1 - cum[end - 1] / end >= target]
+    return float(max(ok) / len(errors)) if ok else 0.0
 
 
 # ----- summary -------------------------------------------------------------------------------

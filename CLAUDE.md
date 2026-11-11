@@ -7,7 +7,7 @@ medido es válido. Plan completo: `docs/PLAN.md`. El usuario se comunica en espa
 
 ## Estado
 - 2026-10-10: plan v2; las preguntas P1–P8 están resueltas (`docs/PLAN.md` §1).
-- Fase 0 en curso. Hecho: workspace `uv` (Python 3.12; `packages/reqcore` + `bench`), clientes Jev y
+- Fase 0 hecha; fase 1 en dev hecha hasta B5 (pasos 2–5). Hecho en fase 0: workspace `uv` (Python 3.12; `packages/reqcore` + `bench`), clientes Jev y
   Claude con caché y presupuesto, datos (`uv run reqbench data all`), splits congelados (hash
   `224a6fa3…`), ejemplos `examples_v1`, `docs/DATA_CARD.md`, `docs/PREREGISTRATION.md`, 52 tests en verde.
   Primer commit `345a5b7` (prerregistro + splits) publicado en https://github.com/davra02/req-classifier
@@ -59,13 +59,25 @@ medido es válido. Plan completo: `docs/PLAN.md`. El usuario se comunica en espa
    0,73–0,87). Frente a J1: entre −0,114 y −0,158 (todas con IC < 0); frente a B3: +0,056 a
    +0,100. ECE 0,18, cobertura al 95 % 0,08. Ensemble de semillas (exploratorio) 0,720.
    Limitación: el tope de 15 épocas se alcanzó en 3 de 25 entrenamientos.
-5. **Haiku en dev** con k = 5 (Batch API para lo que no mide latencia); iteración de prompts solo
-   sobre un subconjunto de 150 de dev; máximo 15 versiones registradas.
+5. **B5 Haiku 5.5 en dev: hecho (2026-11-11)**, `uv run reqbench haiku [--run]` (sin `--run` es
+   *dry run*). Prompt v1 sin iterar (Jev tampoco se iteró), pensamiento desactivado, esfuerzo
+   low, enum de 6 clases, k = 5 (probabilidad = frecuencia). 3.039 llamadas por Batch API
+   (estado en `cache/batches/`, reanudable) + 150 estándar de latencia; $0.213. Resultados en
+   `docs/reports/phase1/LLM_ITERATIONS.md`. Macro-F1 **0,858** [0,817; 0,894]; B5 − J1 = +0,028
+   [−0,001; +0,058] (no separables, pero **J1 no cumple la no inferioridad con δ = 0,03 en
+   dev**: límite inferior −0,058); nivel 1 y accuracy de B5 mejores (+0,03, IC > 0). Pero las
+   5 muestras coinciden en el 97 % y esas aciertan solo el 89 %: **cobertura al 95 % = 0** y
+   AURC 0,109 frente a 0,049 de J1 (J1 mejor, IC > 0). Coste por 1.000: $0,63 ($0,315 batch)
+   frente a $0,089 de Jev; latencia p95 ~2,1 s frente a 0,2 s. Estabilidad 1,8 % (Jev 0,7 %);
+   orden 4,0 % frente a 2,3 % de ruido, sin sesgo de primera posición.
+   **Corrección de métrica (2026-11-11):** AURC y cobertura trataban los empates de confianza
+   por el orden de entrada; ahora un bloque empatado es indivisible. Cambian algo J1/J2/J4
+   (J1 AURC 0,049, cobertura 0,641); B2–B4 no cambian.
 6. Calibración, umbrales, congelación, **test una sola vez** (+ fresco) e informe
    `docs/reports/phase1/REPORT.md`.
 - Comandos: `uv run reqbench data all|download|build|split|examples` · `uv run reqbench budget` ·
   `uv run reqbench smoke [--run]` · `uv run reqbench fresh collect [--write] [--refresh]|annotate|assign|form|message|reply|kappa` · `uv run reqbench baselines [--systems b0 b1 b2 b3]` · `uv run reqbench jev [--run]` ·
-  `uv run reqbench finetune [--n-seeds 5]` · `uv run --group dev pytest -q` · `uv run --group dev ruff check packages bench`. **La fase 1 (MVP) es SOLO el benchmark de tipo sobre PROMISE, con su
+  `uv run reqbench finetune [--n-seeds 5]` · `uv run reqbench haiku [--run]` · `uv run --group dev pytest -q` · `uv run --group dev ruff check packages bench`. **La fase 1 (MVP) es SOLO el benchmark de tipo sobre PROMISE, con su
   informe. Nada de servicio ni interfaz hasta tener la decisión de la fase 1.**
 - El usuario acepta el presupuesto de créditos de API (≤ $10).
 - **Credenciales en `.env.local`** (nunca imprimir sus valores; cargar con `set -a; . ./.env.local; set +a`;
