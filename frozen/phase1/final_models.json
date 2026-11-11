@@ -1,0 +1,106 @@
+{
+ "B0_majority": {
+  "file": "runs/phase1/final/B0_majority.pkl",
+  "params": {
+   "label": "functional"
+  },
+  "sha256": "bd848584e87964be8d5bd5001e7a43121a0d5ea383ce5bce0ed0e5818235052f"
+ },
+ "B1_keywords": {
+  "file": "runs/phase1/final/B1_keywords.pkl",
+  "params": {
+   "version": "type_keywords_v1"
+  },
+  "sha256": "4e7d7968e0ebd4a9f1d2785fbb6a533579b7413e29b027110d622be7e6e848a1"
+ },
+ "B2_tfidf_lr": {
+  "file": "runs/phase1/final/B2_tfidf_lr.pkl",
+  "params": {
+   "lr__C": "30.0",
+   "lr__class_weight": "None",
+   "tfidf__ngram_range": "(1, 2)"
+  },
+  "sha256": "247ee98c93c016e13d9a94ec66117257bf7d51a8605bf5da5c3298d09bd1ff9a"
+ },
+ "B3_bge_small_lr": {
+  "file": "runs/phase1/final/B3_bge_small_lr.pkl",
+  "params": {
+   "C": "3.0",
+   "class_weight": "None"
+  },
+  "sha256": "3ff213459b83476c7adcc3c77374d851cdce94253e25c7c40f4e8360f773b8df"
+ },
+ "B4_deberta_v3_small_s1": {
+  "file": "runs/phase1/final/B4_deberta_v3_small_s1/model.safetensors",
+  "params": {
+   "device": "mps",
+   "epochs": "10",
+   "fit_seconds": "188.2",
+   "inner_val_fold": "0",
+   "inner_val_macro_f1": "[0.0455, 0.1087, 0.1701, 0.4318, 0.4626, 0.6423, 0.6639, 0.6716, 0.6544, 0.7175, 0.6448, 0.6965, 0.7002, 0.7147, 0.7147]",
+   "recipe": "{'lr': 3e-05, 'weight_decay': 0.01, 'batch_size': 16, 'max_epochs': 15, 'warmup': 0.1, 'max_length': 64, 'eval_batch_size': 64}",
+   "seed": "20261010"
+  },
+  "sha256": "9cbcb6d3a0b67750328ab89f9f1f94fcbc22a1f9f612d65976c925d65c29681c"
+ },
+ "B4_deberta_v3_small_s2": {
+  "file": "runs/phase1/final/B4_deberta_v3_small_s2/model.safetensors",
+  "params": {
+   "device": "mps",
+   "epochs": "11",
+   "fit_seconds": "197.6",
+   "inner_val_fold": "0",
+   "inner_val_macro_f1": "[0.1087, 0.1087, 0.1902, 0.2956, 0.5051, 0.6096, 0.7187, 0.6966, 0.7546, 0.7624, 0.7909, 0.7546, 0.7707, 0.7707, 0.7707]",
+   "recipe": "{'lr': 3e-05, 'weight_decay': 0.01, 'batch_size': 16, 'max_epochs': 15, 'warmup': 0.1, 'max_length': 64, 'eval_batch_size': 64}",
+   "seed": "20261011"
+  },
+  "sha256": "967c262d11a190e3b09ce85b6e2c8069d45ec93a0775f6c36348122bd7966df4"
+ },
+ "B4_deberta_v3_small_s3": {
+  "file": "runs/phase1/final/B4_deberta_v3_small_s3/model.safetensors",
+  "params": {
+   "device": "mps",
+   "epochs": "9",
+   "fit_seconds": "194.8",
+   "inner_val_fold": "0",
+   "inner_val_macro_f1": "[0.1087, 0.1087, 0.2681, 0.342, 0.6114, 0.6495, 0.6644, 0.6749, 0.7205, 0.6966, 0.7205, 0.6927, 0.6927, 0.6927, 0.6927]",
+   "recipe": "{'lr': 3e-05, 'weight_decay': 0.01, 'batch_size': 16, 'max_epochs': 15, 'warmup': 0.1, 'max_length': 64, 'eval_batch_size': 64}",
+   "seed": "20261012"
+  },
+  "sha256": "8f3d243ad035d862daada357ed50b9d67cb24c449031846e636a58fad6d78d52"
+ },
+ "B4_deberta_v3_small_s4": {
+  "file": "runs/phase1/final/B4_deberta_v3_small_s4/model.safetensors",
+  "params": {
+   "device": "mps",
+   "epochs": "11",
+   "fit_seconds": "198.5",
+   "inner_val_fold": "0",
+   "inner_val_macro_f1": "[0.1087, 0.1087, 0.1977, 0.3482, 0.347, 0.5481, 0.647, 0.7284, 0.6642, 0.7141, 0.7628, 0.7296, 0.7324, 0.7038, 0.7038]",
+   "recipe": "{'lr': 3e-05, 'weight_decay': 0.01, 'batch_size': 16, 'max_epochs': 15, 'warmup': 0.1, 'max_length': 64, 'eval_batch_size': 64}",
+   "seed": "20261013"
+  },
+  "sha256": "b6eb4fdc8567e46a8696f0911b28e7230454ab660a0664243c9d4452680524c4"
+ },
+ "B4_deberta_v3_small_s5": {
+  "file": "runs/phase1/final/B4_deberta_v3_small_s5/model.safetensors",
+  "params": {
+   "device": "mps",
+   "epochs": "12",
+   "fit_seconds": "196.0",
+   "inner_val_fold": "0",
+   "inner_val_macro_f1": "[0.1087, 0.1087, 0.1904, 0.3714, 0.6184, 0.656, 0.7314, 0.7982, 0.7368, 0.7705, 0.8086, 0.8186, 0.8058, 0.8058, 0.8058]",
+   "recipe": "{'lr': 3e-05, 'weight_decay': 0.01, 'batch_size': 16, 'max_epochs': 15, 'warmup': 0.1, 'max_length': 64, 'eval_batch_size': 64}",
+   "seed": "20261014"
+  },
+  "sha256": "6e768e3db4e41b744832ed5c587c78bc14024e14f7d3318e0e62d11f636b72dc"
+ },
+ "J3_jev_lr": {
+  "file": "runs/phase1/final/J3_jev_lr.pkl",
+  "params": {
+   "C": "30.0",
+   "class_weight": "None"
+  },
+  "sha256": "cc334f6053935b07e9852718e43f9ff4fabb576dee0221e9642d264388cb065a"
+ }
+}

@@ -165,6 +165,30 @@ def coverage_at_precision(gold: Sequence[str], probs: np.ndarray, labels: Sequen
     return float(max(ok) / len(errors)) if ok else 0.0
 
 
+def threshold_at_precision(gold: Sequence[str], probs: np.ndarray, labels: Sequence[str],
+                           target: float = TARGET_PRECISION) -> float | None:  # fmt: skip
+    """Confidence threshold of `coverage_at_precision`: rows with max probability >= it are
+    decided automatically. None when no threshold reaches the target (everything to review)."""
+    errors, ends = _ranked(gold, probs, labels)
+    cum = np.cumsum(errors)
+    ok = [end for end in ends if 1 - cum[end - 1] / end >= target]
+    if not ok:
+        return None
+    confidence = np.sort(np.round(probs.max(axis=1), 12))[::-1]
+    return float(confidence[max(ok) - 1])
+
+
+def selective(gold: Sequence[str], pred: Sequence[str], probs: np.ndarray,
+              threshold: float | None) -> dict:  # fmt: skip
+    """Coverage and precision of the automatic decisions at a frozen threshold (plan §6.5)."""
+    if threshold is None:
+        return {"threshold": None, "coverage": 0.0, "n_auto": 0, "precision": None}
+    auto = np.round(probs.max(axis=1), 12) >= threshold
+    right = np.asarray(gold) == np.asarray(pred)
+    return {"threshold": threshold, "coverage": float(auto.mean()), "n_auto": int(auto.sum()),
+            "precision": float(right[auto].mean()) if auto.any() else None}  # fmt: skip
+
+
 # ----- summary -------------------------------------------------------------------------------
 
 

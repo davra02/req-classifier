@@ -262,6 +262,94 @@ def cmd_finetune(args: argparse.Namespace) -> None:
                   f"[{m['ci95'][0]:+.3f}, {m['ci95'][1]:+.3f}]")
 
 
+def cmd_calibrate(args: argparse.Namespace) -> None:
+    import pandas as pd
+
+    from reqbench.eval.calibrate_dev import frozen_dir, run_calibration_dev
+
+    report = run_calibration_dev(n_resamples=args.n_resamples)
+    spec = json.loads((frozen_dir() / "calibrators.json").read_text())["systems"]
+    rows = []
+    for name, rep in report.items():
+        raw, cal, thr = rep["raw"], rep["calibrated"], rep["threshold_dev"]
+        lo, hi = cal["ece"]["ci95"]
+        rows.append({
+            "system": name,
+            "calibrator": " + ".join(f"{q}:{s['name']}" if q != "system" else s["name"]
+                                     for q, s in spec[name]["questions"].items()),
+            "ECE raw": f"{raw['ece']['value']:.3f}",
+            "ECE cal [CI]": f"{cal['ece']['value']:.3f} [{lo:.3f}, {hi:.3f}]",
+            "logloss": f"{raw['log_loss']:.3f}->{cal['log_loss']:.3f}",
+            "AURC": f"{raw['aurc']:.3f}->{cal['aurc']:.3f}",
+            "macroF1 cal": f"{cal['macro_f1']:.3f}",
+            "threshold": "—" if thr["threshold"] is None else f"{thr['threshold']:.3f}",
+            "cov@95": f"{thr['coverage']:.3f}",
+        })  # fmt: skip
+    print(pd.DataFrame(rows).to_string(index=False))
+
+
+def cmd_final(args: argparse.Namespace) -> None:
+    from reqbench.eval import final_models
+
+    if not args.skip_classical:
+        _print({k: v["params"] for k, v in final_models.fit_classical().items()})
+    if not args.skip_b4:
+        final_models.fit_b4()
+
+
+def cmd_freeze(args: argparse.Namespace) -> None:
+    from reqbench.eval import heldout
+
+    freeze = heldout.write_freeze()
+    print(f"Wrote {heldout.freeze_path()} ({len(freeze['files'])} files), "
+          f"freeze hash {freeze['freeze_hash']}")  # fmt: skip
+
+
+def cmd_heldout(args: argparse.Namespace) -> None:
+    from reqbench.eval import heldout
+
+    mode = "run" if args.run else "cache" if args.from_cache else "dry"
+    result = heldout.run(args.set, mode, n_resamples=args.n_resamples,
+                         restart_reason=args.restart_reason)
+    if "dry_run" in result:
+        _print(result["dry_run"])
+        print("Dry run: no API call made and no label read. Re-run with --run to evaluate.")
+        return
+    _print(result.get("decision", {}))
+    print(f"Results: {heldout.out_dir(args.set) / 'results.json'}")
+
+
+def cmd_reproduce(args: argparse.Namespace) -> None:
+    """Regenerate every dev table, the calibration, the held-out results and the report.
+
+    With --from-cache no API is ever called (every call must be cached); without it, missing
+    dev calls are made (with the usual budget guard). The held-out sets are only re-read from
+    the cache, never evaluated anew."""
+    from reqbench.eval import heldout
+    from reqbench.eval.calibrate_dev import run_calibration_dev
+    from reqbench.eval.finetune_dev import run_finetune_dev
+    from reqbench.eval.haiku_dev import run_haiku_dev
+    from reqbench.eval.jev_dev import run_jev_dev
+
+    cmd_baselines(argparse.Namespace(systems=["b0", "b1", "b2", "b3"],
+                                     n_resamples=args.n_resamples))  # fmt: skip
+    for name, report in (("jev", run_jev_dev(run=not args.from_cache,
+                                             n_resamples=args.n_resamples)),
+                         ("haiku", run_haiku_dev(run=not args.from_cache,
+                                                 n_resamples=args.n_resamples))):  # fmt: skip
+        if "dry_run" in report:
+            raise SystemExit(f"{name}: calls missing from the cache: {report['dry_run']}")
+    run_finetune_dev(n_resamples=args.n_resamples)
+    run_calibration_dev(n_resamples=args.n_resamples)
+    for set_name in heldout.SETS:
+        if any(e["event"] == "completed" for e in heldout._log_entries(set_name)):
+            heldout.run(set_name, "cache", n_resamples=args.n_resamples)
+            print(f"{set_name}: re-evaluated from the cache")
+    from reqbench.report import phase1
+
+    print(f"Report: {phase1.write_report()}")
+
+
 def main() -> None:
     load_env()
     parser = argparse.ArgumentParser(prog="reqbench")
@@ -332,6 +420,34 @@ def main() -> None:
     ft.add_argument("--max-epochs", type=int, default=15)
     ft.add_argument("--n-resamples", type=int, default=10_000)
     ft.set_defaults(func=cmd_finetune)
+
+    cal = sub.add_parser("calibrate", help="phase 1: calibrators and review thresholds on dev")
+    cal.add_argument("--n-resamples", type=int, default=10_000)
+    cal.set_defaults(func=cmd_calibrate)
+
+    fin = sub.add_parser("final", help="phase 1: fit B0-B4 and J3 on all of dev (no cost)")
+    fin.add_argument("--skip-classical", action="store_true")
+    fin.add_argument("--skip-b4", action="store_true")
+    fin.set_defaults(func=cmd_final)
+
+    sub.add_parser("freeze", help="phase 1: write frozen/phase1/FREEZE.json (hashes)"
+                   ).set_defaults(func=cmd_freeze)  # fmt: skip
+
+    ho = sub.add_parser("heldout", help="phase 1: one-time evaluation on test or fresh "
+                        "(dry run unless --run or --from-cache)")  # fmt: skip
+    ho.add_argument("set", choices=["test", "fresh"])
+    group = ho.add_mutually_exclusive_group()
+    group.add_argument("--run", action="store_true", help="make the paid calls, then evaluate")
+    group.add_argument("--from-cache", action="store_true", help="evaluate from the cache only")
+    ho.add_argument("--n-resamples", type=int, default=10_000)
+    ho.add_argument("--restart-reason", help="log a restart after an attempt that crashed "
+                    "before writing results (needed only if the freeze changed)")
+    ho.set_defaults(func=cmd_heldout)
+
+    rep = sub.add_parser("reproduce", help="regenerate every table, figure and the report")
+    rep.add_argument("--from-cache", action="store_true", help="never call an API")
+    rep.add_argument("--n-resamples", type=int, default=10_000)
+    rep.set_defaults(func=cmd_reproduce)
 
     args = parser.parse_args()
     args.func(args)

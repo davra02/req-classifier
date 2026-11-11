@@ -51,7 +51,11 @@ class ClaudeConfig:
 
 
 HAIKU = ClaudeConfig("claude-haiku-5-5", effort="low", disable_thinking=True, max_tokens=256)
-OPUS = ClaudeConfig("claude-opus-5-5", effort="low", disable_thinking=False, max_tokens=4096)
+# Opus 5.5 cannot disable thinking; thinking tokens count against max_tokens. At effort low the
+# smoke test used ~10 output tokens; 1024 keeps the budget guard's worst case (full max_tokens
+# on every call) for the 171-call test batch under the $3 Opus bucket. A truncated answer is
+# recorded as an invalid label (stop_reason max_tokens), never retried silently.
+OPUS = ClaudeConfig("claude-opus-5-5", effort="low", disable_thinking=False, max_tokens=1024)
 
 
 @dataclass(frozen=True)

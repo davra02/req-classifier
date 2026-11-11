@@ -30,7 +30,11 @@ medido es válido. Plan completo: `docs/PLAN.md`. El usuario se comunica en espa
    WhatsApp `1F 2S …` → `fresh reply --who b|c --paste`).
    B respondió el 2026-11-10: κ A–B hojas 0,20 [0,00; 0,40] (37 % de acuerdo), nivel 1 0,11
    (n = 30): muy bajo; esperar a C antes de concluir y no tocar `annotator_a` (la adjudicación va
-   en `adjudicated`). Pendiente: C (y D si hace falta).
+   en `adjudicated`). **C y D respondieron el 2026-11-11** (`fresh reply`; D = reserva, se
+   suma al doble anotado: 90 frases). κ hojas (con `discard`): A–C 0,46 [0,24; 0,67], A–D 0,27
+   [0,06; 0,47], conjunto 0,31 [0,18; 0,43] (47 % de acuerdo); nivel 1 conjunto 0,29. Patrón:
+   A usa `other` donde los demás dicen functional/security. Techo humano bajo: reportarlo.
+   Pendiente: adjudicar las 90 (decisión humana) y commit de congelación.
    Después: `fresh kappa`, adjudicar las 60 (el resto = etiqueta de A) y commit para congelarlo
    antes de evaluar nada sobre él. Puede ir en paralelo al paso 2. Limitación
    que reportar: muchos SRS de 2025–2026 estarán escritos con LLM sin declararlo.
@@ -73,11 +77,20 @@ medido es válido. Plan completo: `docs/PLAN.md`. El usuario se comunica en espa
    **Corrección de métrica (2026-11-11):** AURC y cobertura trataban los empates de confianza
    por el orden de entrada; ahora un bloque empatado es indivisible. Cambian algo J1/J2/J4
    (J1 AURC 0,049, cobertura 0,641); B2–B4 no cambian.
-6. Calibración, umbrales, congelación, **test una sola vez** (+ fresco) e informe
-   `docs/reports/phase1/REPORT.md`.
+6. **Calibración, umbrales y congelación: hechos (2026-11-11).** `uv run reqbench calibrate`
+   (CV anidada por proyecto; gana vector scaling en J1/J2/B5, Platt+vector en J4, temperatura
+   en J3; identidad nunca), `reqbench final` (B0–B4 y J3 entrenados en todo dev, hashes en
+   `frozen/phase1/final_models.json`), `reqbench freeze` → `frozen/phase1/FREEZE.json`
+   (hash `1ff9e151…`, explicado en `docs/reports/phase1/FREEZE.md`; desviación 3 del
+   prerregistro: test antes que fresco, suite adversarial, Opus `max_tokens` 1024, lectura
+   operativa de la regla). Siguiente: `reqbench heldout test` (dry run ≈ $0,81; `--run` paga,
+   registra en `EVAL_LOG.jsonl` y evalúa una vez), informe `REPORT.md`
+   (`reqbench reproduce [--from-cache]`). El fresco, con la MISMA congelación.
 - Comandos: `uv run reqbench data all|download|build|split|examples` · `uv run reqbench budget` ·
   `uv run reqbench smoke [--run]` · `uv run reqbench fresh collect [--write] [--refresh]|annotate|assign|form|message|reply|kappa` · `uv run reqbench baselines [--systems b0 b1 b2 b3]` · `uv run reqbench jev [--run]` ·
-  `uv run reqbench finetune [--n-seeds 5]` · `uv run reqbench haiku [--run]` · `uv run --group dev pytest -q` · `uv run --group dev ruff check packages bench`. **La fase 1 (MVP) es SOLO el benchmark de tipo sobre PROMISE, con su
+  `uv run reqbench finetune [--n-seeds 5]` · `uv run reqbench haiku [--run]` ·
+  `uv run reqbench calibrate|final|freeze` · `uv run reqbench heldout test|fresh [--run|--from-cache]` ·
+  `uv run reqbench reproduce [--from-cache]` · `uv run --group dev pytest -q` · `uv run --group dev ruff check packages bench`. **La fase 1 (MVP) es SOLO el benchmark de tipo sobre PROMISE, con su
   informe. Nada de servicio ni interfaz hasta tener la decisión de la fase 1.**
 - El usuario acepta el presupuesto de créditos de API (≤ $10).
 - **Credenciales en `.env.local`** (nunca imprimir sus valores; cargar con `set -a; . ./.env.local; set +a`;

@@ -1,0 +1,98 @@
+{
+ "B2_tfidf_lr": {
+  "target_precision": 0.95,
+  "threshold": 0.93736456033,
+  "coverage": 0.04805491990846682,
+  "n_auto": 21,
+  "precision": 0.9523809523809523,
+  "set_on": "dev nested-CV calibrated probabilities"
+ },
+ "B3_bge_small_lr": {
+  "target_precision": 0.95,
+  "threshold": 0.999703450303,
+  "coverage": 0.009153318077803204,
+  "n_auto": 4,
+  "precision": 1.0,
+  "set_on": "dev nested-CV calibrated probabilities"
+ },
+ "B4_deberta_v3_small_s1": {
+  "target_precision": 0.95,
+  "threshold": 0.922400824683,
+  "coverage": 0.05263157894736842,
+  "n_auto": 23,
+  "precision": 0.9565217391304348,
+  "set_on": "dev nested-CV calibrated probabilities"
+ },
+ "B4_deberta_v3_small_s2": {
+  "target_precision": 0.95,
+  "threshold": 0.961338147866,
+  "coverage": 0.10526315789473684,
+  "n_auto": 46,
+  "precision": 0.9565217391304348,
+  "set_on": "dev nested-CV calibrated probabilities"
+ },
+ "B4_deberta_v3_small_s3": {
+  "target_precision": 0.95,
+  "threshold": 0.974530520175,
+  "coverage": 0.06178489702517163,
+  "n_auto": 27,
+  "precision": 0.9629629629629629,
+  "set_on": "dev nested-CV calibrated probabilities"
+ },
+ "B4_deberta_v3_small_s4": {
+  "target_precision": 0.95,
+  "threshold": 0.985234125522,
+  "coverage": 0.011441647597254004,
+  "n_auto": 5,
+  "precision": 1.0,
+  "set_on": "dev nested-CV calibrated probabilities"
+ },
+ "B4_deberta_v3_small_s5": {
+  "target_precision": 0.95,
+  "threshold": 0.97609978875,
+  "coverage": 0.06407322654462243,
+  "n_auto": 28,
+  "precision": 0.9642857142857143,
+  "set_on": "dev nested-CV calibrated probabilities"
+ },
+ "B5_haiku_k5": {
+  "target_precision": 0.95,
+  "threshold": null,
+  "coverage": 0.0,
+  "n_auto": 0,
+  "precision": null,
+  "set_on": "dev nested-CV calibrated probabilities"
+ },
+ "J1_jev_choice": {
+  "target_precision": 0.95,
+  "threshold": 0.881763543199,
+  "coverage": 0.6636155606407322,
+  "n_auto": 290,
+  "precision": 0.9517241379310345,
+  "set_on": "dev nested-CV calibrated probabilities"
+ },
+ "J2_jev_choice_rot_avg": {
+  "target_precision": 0.95,
+  "threshold": 0.891869892105,
+  "coverage": 0.6544622425629291,
+  "n_auto": 286,
+  "precision": 0.951048951048951,
+  "set_on": "dev nested-CV calibrated probabilities"
+ },
+ "J3_jev_lr": {
+  "target_precision": 0.95,
+  "threshold": 0.954217088418,
+  "coverage": 0.3318077803203661,
+  "n_auto": 145,
+  "precision": 0.9517241379310345,
+  "set_on": "dev nested-CV calibrated probabilities"
+ },
+ "J4_jev_hierarchical": {
+  "target_precision": 0.95,
+  "threshold": 0.903816932179,
+  "coverage": 0.5194508009153318,
+  "n_auto": 227,
+  "precision": 0.9515418502202643,
+  "set_on": "dev nested-CV calibrated probabilities"
+ }
+}

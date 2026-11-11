@@ -1,0 +1,142 @@
+{
+ "adversarial": "adversarial_v1",
+ "claude_configs": {
+  "haiku": {
+   "effort": "low",
+   "max_tokens": 256,
+   "model": "claude-haiku-5-5",
+   "thinking": {
+    "type": "disabled"
+   }
+  },
+  "opus": {
+   "effort": "low",
+   "max_tokens": 1024,
+   "model": "claude-opus-5-5"
+  }
+ },
+ "decision": {
+  "bstar_candidates": [
+   "B0_majority",
+   "B1_keywords",
+   "B2_tfidf_lr",
+   "B3_bge_small_lr",
+   "B4_deberta_v3_small",
+   "B5_haiku_k5"
+  ],
+  "delta": 0.03,
+  "ece_max": 0.05,
+  "flip_max": 0.03,
+  "order_max": 0.05,
+  "p95_max_ms": 1000.0,
+  "target_precision": 0.95,
+  "usd_per_1000_max": 1.0
+ },
+ "dev_inputs_sha256": {
+  "jev_answers.csv": "e19a68dadfe21cda45f2ad3fee23f5ea06880109617d2a56a9ecc4382bfc692f",
+  "oof_B0_majority.csv": "274e282c014c4593d6045d2208d72931144528a95136c4fb7a9b8374da5f3554",
+  "oof_B1_keywords.csv": "3bfd460128b4611360c2ffb3c8bfe5f751934a62b6979864e25f8fc69390991a",
+  "oof_B2_tfidf_lr.csv": "3a409218a09a584f59b6d2962852b263e9e735910ce39e9ab59ebe0a253686a9",
+  "oof_B3_bge_small_lr.csv": "10b4efe852bfc56d7db38de8dd0fa88aa17201362d8747eeed21c257abcebcb8",
+  "oof_B4_deberta_v3_small_s1.csv": "8ade035c98ad7613d61a8f584341a1afe030ac98cd6f39e3161148c8b77e5704",
+  "oof_B4_deberta_v3_small_s2.csv": "bd91465c46e9a2a05ccdadd7c229e40b223cc22a51e0707592f6688fcba5bb45",
+  "oof_B4_deberta_v3_small_s3.csv": "8dc9e46e59d11cb9982ce203f53bea2d723d5bf5b783b1b7249e73e25bf1a6d1",
+  "oof_B4_deberta_v3_small_s4.csv": "d2ab4af70a641fd7ff6649b110f863c996e96b6d04dd0924ed12f69eee5cd4b9",
+  "oof_B4_deberta_v3_small_s5.csv": "ef3ef4dc018fa94d64002dda3c9d588de36798d7a0ec39fd4354ae1347113fa9",
+  "oof_B4_deberta_v3_small_seed_ensemble.csv": "650de1644e6d66e28e59896d1783eb427f1af7c97558c64a8ede7472353a8b1b",
+  "oof_B5_haiku_k5.csv": "4e37a412546ea4484e9648e1042fd79d2181b98610643186db5652567cad3d30",
+  "oof_B5x_haiku_single.csv": "1e19d237d679f048f1c770768aa27099ee7025c4f4a87209e2bfad6923036fac",
+  "oof_J1_jev_choice.csv": "69d4c803ccd105dea9a30ceddc33df023286b2d9ba367125b183b21f6dc36fc2",
+  "oof_J2_jev_choice_rot_avg.csv": "59cc78097b2f6077378f597ea3b1ab1c4266bf10242e5e4f7c2ca00a894ddca9",
+  "oof_J3_jev_lr.csv": "e12d539a051cea7593fbf17a84b37e6da3400d32e5a0dd39d2936912c955ea90",
+  "oof_J4_jev_hierarchical.csv": "b2eaeb8d770e8a3ce6adfe2f1f73719a04692a1e804a82cf582c424898fd7b8c",
+  "oof_J4x_jev_hierarchical_rot_avg.csv": "580ff06d38cb832989bb8c9f443410416883215336680a220e5d0912cf26255b"
+ },
+ "examples": "examples_v1",
+ "files": {
+  "bench/src/reqbench/data/__init__.py": "38d03a813ae57b91d34adebdfda14595a72de24ee450847b89cb6723ad8e38a3",
+  "bench/src/reqbench/data/build.py": "fd6bd03d032b1bb1f2be82f5afcbecc46a44284b834865af7faf44781902fa5e",
+  "bench/src/reqbench/data/dalpiaz.py": "b8d3ee861f32427012ddd9b47e05bf11e1833d91ca619c755e1cf7f0d137e620",
+  "bench/src/reqbench/data/download.py": "6e2aeb05a0a71c986fa7705c9755aab09b6e722223bf6057a14a6972cf5b229f",
+  "bench/src/reqbench/data/examples.py": "6da8b0b993234cec5bc2c7e5acbedf6d8eeaed0d45960385d2adbd13d54fa10b",
+  "bench/src/reqbench/data/promise.py": "4d43a9cc1781776b4efc0a8f3bc7e110b196a68d3c953d8c5c9a5bb9096d45fe",
+  "bench/src/reqbench/data/sources.py": "7b2a1976b82776eae9141e45fe19c08ad3c0879f3dde7074af2888ebfea09c7d",
+  "bench/src/reqbench/data/splits.py": "9b849e9cc5ca798704748e460b85679314af64f00ff07bb545e58926d5adf12e",
+  "bench/src/reqbench/eval/adversarial.py": "1690ccf7aec9a47330ca9aa30514982afa81acee064d07c24ce92ceaa71e25a4",
+  "bench/src/reqbench/eval/bootstrap.py": "39bf58f3f8d63dddd247beec50bafb4ebfd4227511fa57135eecebe3d7249a06",
+  "bench/src/reqbench/eval/calibrate_dev.py": "50fe0709ee690424cb763756cdddd2ece496e5a61af169e9c3e99b888672afc5",
+  "bench/src/reqbench/eval/calibration.py": "cae771fc15540225e3886041556905df45e739e42011816e2a384858345f8b1e",
+  "bench/src/reqbench/eval/cv.py": "ca782b37f38570b12ff3d635eebfc3546e3767e5caf78c025490deab013eb882",
+  "bench/src/reqbench/eval/final_models.py": "e7cb60b52cd3f63198452fe1180aeaf1c3ae548be9c76c57458f419a4aba5ab9",
+  "bench/src/reqbench/eval/haiku_dev.py": "2c64a06547d60cc87f0f0424ccebe9adcc1bf08a04d87c2ef8770ef94b086e23",
+  "bench/src/reqbench/eval/heldout.py": "0b67359cfaed838aea719295abff6da318d04d69c9ab8e50a33bd903767249e9",
+  "bench/src/reqbench/eval/metrics.py": "758abca996774bdc8c878aae72def08fab51cbcec57c466da92133650f990c23",
+  "bench/src/reqbench/models/__init__.py": "56b2affd94bc80bafbe4a53c51543d275f3bf37f5b2e1e8e5ec484127b697732",
+  "bench/src/reqbench/models/baselines.py": "e0dc1f5b69260d6f057317450d54d3fda8674a2a75912d12fef7c6ec2f541a82",
+  "bench/src/reqbench/models/embeddings.py": "83f8128e9b63fcbaf9d89a5f8824beb3cbbf1185bd953281373cecd0d120882a",
+  "bench/src/reqbench/models/finetune.py": "a50652205b6f6a718d785fbf734a602854920fa5344421723f1282f01be3e9a1",
+  "bench/src/reqbench/models/jev.py": "bcfeb4120bdf7db6e203692b5792ba25720365642053ca1c3bfe79b4b632a54b",
+  "bench/src/reqbench/models/llm.py": "0044077c6af0a77a249f4261dce3a0ecbb360676404b15d2c55621ddc2d15ab4",
+  "data/manifests/promise_v1.json": "ac7a6b6a8f033ce8088275125ffee2a51bbf9d3fa09e02633cd4cc55d356c286",
+  "data/manifests/promise_v1_split_v1.json": "b16e9a203446c9d40c5a3673bc968c280ec5aaf289a24f6d39e8461d69a25ee0",
+  "data/splits/promise_v1_split_v1.csv": "b4c0227a6d4c54cd51efde9dd10938ae2f43f3dced73ab3c0ff301e510433597",
+  "docs/PREREGISTRATION.md": "cac4be8b128ee07b2bbc446f7a74b5c359f33c280873e8827af5c9da65746a35",
+  "frozen/phase1/calibrators.json": "13609d22d616054284a2fb48d729ad856f19b16560efcefa02128ebe31db2a00",
+  "frozen/phase1/final_models.json": "8d9072e0d615088c7b37dabdd55503f7bc80dccb111093d4d1955e9548a094b8",
+  "frozen/phase1/thresholds.json": "c337c6041bff1095954d51398b391dcc00ce96eab2157b41c2486429384900f2",
+  "packages/reqcore/src/reqcore/__init__.py": "cd97c74a69e49d7d79403c342df4d7570ad56283e361cd21a291d4c11f726003",
+  "packages/reqcore/src/reqcore/budget.py": "c627eeb9907cbab6fa50a5dfa4111d9bbfd62fd3d6eaf8335f1add02e116f1ad",
+  "packages/reqcore/src/reqcore/cache.py": "0b72277470e6e634bdb703b04170703c9cef060119c17774102376b20363da6e",
+  "packages/reqcore/src/reqcore/clients/__init__.py": "cd3fd245f6f7bd845a30214b0df1c6b13390cd47ebde31da75007c993a045192",
+  "packages/reqcore/src/reqcore/clients/claude.py": "3677f52e94a1b30e82ff5065b80cf783e09bc173dd1a255f7bb18862f744f5ec",
+  "packages/reqcore/src/reqcore/clients/jev.py": "91540ad9802df872b726f47f1ab5099de55d07873c98a49c39ca8568d96fcbe6",
+  "packages/reqcore/src/reqcore/env.py": "6785543fc1d1e139ac534276bf6ede84d545af67af4947402bcc49cdbc54af37",
+  "packages/reqcore/src/reqcore/hashing.py": "f56196bce7fae261c07c495af566d3415b9024d98a5a9590dba31893638b962b",
+  "packages/reqcore/src/reqcore/normalize.py": "fbc250140610c0a232efbb93e6c3047b532cda3d713f547b425b2f9b74242096",
+  "packages/reqcore/src/reqcore/paths.py": "061f1d448f048ad766993102e09ac4c09cb0a1a891edbb6adfe65559d607daab",
+  "packages/reqcore/src/reqcore/pricing.py": "f49f4782f4f1becafa8d1dce59a5a96f6ce74ac4b159b4f1bab091046743fc4a",
+  "packages/reqcore/src/reqcore/questions.py": "29d062255d73a5fdc9beda11fb58b3e203f7a261b5644f12614c19f38d9abd62",
+  "questions/adversarial_v1.yaml": "ab4830cea57c8d6df23956fc16c52ae3181e515bf4788c7ee8e2972f5f104be1",
+  "questions/examples_v1.yaml": "a29247d9ebb4b00e1eecfd104158a1011700d0f4a486710540023bd8ac0a2dec",
+  "questions/jev_type_v1.yaml": "5e35cf9bd6ab437a6bf1cff87c1db3a0b8f880b9884a2520221ee0c74d50ecca",
+  "questions/llm_type_v1.yaml": "57f99e585087f528faf7bc56cb53680c7f94bb0538f06f762bd6e2eaa682c5a5",
+  "questions/taxonomy_v1.yaml": "fe5a27a12de534f872f9901f1a4f746c44871d10d7cde337a612af550264143f",
+  "rules/type_keywords_v1.yaml": "dd628538bc46db3bf76854f5a844586a82debd2729bf388c6b74adc6bc51780c",
+  "uv.lock": "fd0bd3e206179e3e6a3d4d1ec1d1b5ec0182c3d368235aa8a68bb551b58e02d1"
+ },
+ "freeze_hash": "1ff9e151d1729968d1e9f155eef463d22dc9fb3e5e1caadcdb7b4da6ab60df19",
+ "haiku_question_set_hashes": {
+  "0": "54ab42b2b3f0da3cabe65562436f21578096b70761224149cf6aea783a196d2c",
+  "1": "4f5d24e81264bf73e1aab98c8b5d6a499648d9775ae2d05c771e705521437ab1",
+  "2": "6a2d00c5c91a01faf472c500396e9b112d9862c0d9893b63085e60560ca579bf"
+ },
+ "jev_question_set": "jev_type_v1",
+ "jev_question_set_hashes": {
+  "0": "554cbc9436d1186d0e796df1e24d8437f87e3865eabadef69451309ec07af691",
+  "1": "505c1700f0c14290d16127d6c4ca4b2d0083150efb11c456c98cc2844333a3c3",
+  "2": "afe9dc446e1b32b8e18e59c21f8e70abbabce097c44e02ac8dd4ffc919fe7f74"
+ },
+ "k_haiku": 5,
+ "llm_prompt": "llm_type_v1",
+ "models": {
+  "bge_small": "BAAI/bge-small-en-v1.5@5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+  "deberta": "microsoft/deberta-v3-small@a36c739020e01763fe789b4b85e2df55d6180012",
+  "haiku": "claude-haiku-5-5",
+  "jev": "jev-1.14.0",
+  "opus": "claude-opus-5-5"
+ },
+ "n_bootstrap": 10000,
+ "opus_question_set_hash": "5f710492c351a0b1181a4ea6c3058686014174c50b8e6ceceef5bf4d162c11be",
+ "seeds": {
+  "adversarial": 20261012,
+  "b4": [
+   20261010,
+   20261011,
+   20261012,
+   20261013,
+   20261014
+  ],
+  "bootstrap": 20261010,
+  "split": 20261010
+ }
+}

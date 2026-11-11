@@ -45,16 +45,18 @@ def latency_calls(rows: pd.DataFrame) -> list[llm.Call]:
             for s in llm.LATENCY_SAMPLES]  # fmt: skip
 
 
-def _estimate(calls, lat_calls, clfs, budget) -> dict:
+def estimate_llm(calls, lat_calls, clfs, budget, model: str = HAIKU.model,
+                 fallback_tokens: tuple[float, float] = SMOKE_TOKENS) -> dict:  # fmt: skip
+    """Dry run for Claude calls: cache misses and their cost with and without the Batch API.
+    Tokens per call = mean of the cached calls of this plan, else `fallback_tokens`."""
     missing = [c for c in calls if clfs[c.rotation].cached(c.text, c.sample_index) is None]
     lat_missing = [c for c in lat_calls if clfs[0].cached(c.text, c.sample_index) is None]
     seen = [clfs[c.rotation].cached(c.text, c.sample_index) for c in calls + lat_calls]
     seen = [r for r in seen if r is not None and r.input_tokens]
     tokens_in, tokens_out = (
         (float(np.mean([r.input_tokens for r in seen])),
-         float(np.mean([r.output_tokens for r in seen]))) if seen else SMOKE_TOKENS
+         float(np.mean([r.output_tokens for r in seen]))) if seen else fallback_tokens
     )  # fmt: skip
-    model = HAIKU.model
 
     def usd(n_calls: int, batch: bool) -> float:
         return n_calls * cost_usd(model, round(tokens_in), round(tokens_out), batch)
@@ -70,7 +72,7 @@ def _estimate(calls, lat_calls, clfs, budget) -> dict:
         "latency_calls_total": len(lat_calls), "latency_calls_to_make": len(lat_missing),
         "pending_batches": pending,
         "tokens_per_call": {"input": tokens_in, "output": tokens_out,
-                            "source": "cache" if seen else "smoke test"},
+                            "source": "cache" if seen else "fallback"},
         "expected_usd": {
             "batch_calls_with_batch_api": usd(len(missing), True),
             "batch_calls_without_batch_api": usd(len(missing), False),
@@ -158,7 +160,7 @@ def run_haiku_dev(run: bool = False, latency_n: int = 30, poll_seconds: float = 
     clfs = llm.classifiers(llm.ROTATIONS, cache=cache, budget=budget)
     calls = llm.plan_calls(rows)
     lat_calls = latency_calls(latency_rows(rows, latency_n))
-    estimate = _estimate(calls, lat_calls, clfs, budget)
+    estimate = estimate_llm(calls, lat_calls, clfs, budget)
     work_left = (estimate["batch_calls_to_make"] or estimate["latency_calls_to_make"]
                  or estimate["pending_batches"])  # fmt: skip
     if work_left and not run:

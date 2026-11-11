@@ -45,8 +45,13 @@ class JevClient:
         self.model = model
         self.cache = cache or InferenceCache()
         self.budget = budget or Budget()
-        # TypeSafeClient reads TYPESAFE_API_KEY from the environment.
-        self._client = client or TypeSafeClient(model=model)
+        self._client = client  # created lazily: dry runs and cache re-reads need no API key
+
+    @property
+    def client(self) -> TypeSafeClient:
+        if self._client is None:
+            self._client = TypeSafeClient(model=self.model)  # reads TYPESAFE_API_KEY
+        return self._client
 
     def estimate_cost(self, state: dict[str, Any], question_set: JevQuestionSet) -> float:
         chars = len(canonical_json({"state": state, "questions": question_set.questions}))
@@ -101,7 +106,7 @@ class JevClient:
 
         self.budget.ensure_affordable(self.model, self.estimate_cost(state, question_set))
         started = time.perf_counter()
-        response = self._client.system_one(state, question_set.questions, model=self.model)
+        response = self.client.system_one(state, question_set.questions, model=self.model)
         latency_ms = (time.perf_counter() - started) * 1000
 
         body = response.model_dump(mode="json")
