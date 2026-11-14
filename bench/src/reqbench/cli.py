@@ -357,6 +357,12 @@ def cmd_audit(args: argparse.Namespace) -> None:
     print(f"Written to {audit_dir() / 'audit.json'}")
 
 
+def cmd_fresh_analysis(args: argparse.Namespace) -> None:
+    from reqbench.eval import fresh_analysis
+
+    _print(fresh_analysis.run(n_resamples=args.n_resamples))
+
+
 def main() -> None:
     load_env()
     parser = argparse.ArgumentParser(prog="reqbench")
@@ -460,6 +466,11 @@ def main() -> None:
                          "post hoc on test predictions)")  # fmt: skip
     aud.add_argument("--n-resamples", type=int, default=10_000)
     aud.set_defaults(func=cmd_audit)
+
+    fa = sub.add_parser("fresh-analysis", help="R1/R2 and human-ceiling analyses of the fresh "
+                        "set (PREREGISTRATION_ADDENDUM.md; reads saved predictions only)")
+    fa.add_argument("--n-resamples", type=int, default=10_000)
+    fa.set_defaults(func=cmd_fresh_analysis)
 
     args = parser.parse_args()
     args.func(args)

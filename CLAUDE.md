@@ -96,6 +96,11 @@ medido es válido. Plan completo: `docs/PLAN.md`. El usuario se comunica en espa
    llamada (B5x 0,788, $0,13/1.000; J3 − B5x +0,008 [−0,032; +0,045]) → **ADR 0002: el usuario
    eligió B5x (Haiku, una llamada)**, siguiendo el desempate literal; ADR 0001 sustituido. REPORT.md con erratas E1–E8. Arreglos de
    código congelado aplazados hasta después del set fresco (lista en AUDIT.md).
+   **Set fresco fijado antes de evaluarlo: `docs/PREREGISTRATION_ADDENDUM.md`** (opción del
+   usuario: reabre el ADR 0002 si R1 J3 − B5x ≥ 0,10 con IC > 0, o R2 caída de B5x − caída media
+   de B4 ≥ 0,10 con IC > 0; B5x como sistema de pleno derecho; κ modelo–gold frente al humano;
+   análisis aparte de las 90 doblemente anotadas). Módulo `reqbench fresh-analysis`. Orden:
+   adjudicar → commit → push → dry run → visto bueno → `heldout fresh --run` → `fresh-analysis`.
 - Comandos: `uv run reqbench data all|download|build|split|examples` · `uv run reqbench budget` ·
   `uv run reqbench smoke [--run]` · `uv run reqbench fresh collect [--write] [--refresh]|annotate|assign|form|message|reply|kappa` · `uv run reqbench baselines [--systems b0 b1 b2 b3]` · `uv run reqbench jev [--run]` ·
   `uv run reqbench finetune [--n-seeds 5]` · `uv run reqbench haiku [--run]` ·
